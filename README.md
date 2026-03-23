@@ -2,6 +2,8 @@
 
 Repo-local Codex workflow installer for existing Next.js repositories.
 
+New here: start with `USER_JOURNEY.md` for the end-to-end flow.
+
 ## Status
 
 `v0.1` is implemented from
