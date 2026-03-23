@@ -33,7 +33,26 @@ export async function prepareManagedWrite(
   const isManaged =
     existingContent.includes(MANAGED_FILE_MARKER) || options.managedPaths.has(file.relativePath);
 
-  if (!isManaged && !options.overwriteManaged) {
+  if (!isManaged) {
+    return {
+      ok: false,
+      conflictPath: file.relativePath
+    };
+  }
+
+  // Unchanged managed files should remain idempotent without requiring an override flag.
+  if (existingContent === file.content) {
+    return {
+      ok: true,
+      preparedWrite: {
+        action: { kind: "overwrite", relativePath: file.relativePath },
+        absolutePath,
+        content: file.content
+      }
+    };
+  }
+
+  if (!options.overwriteManaged) {
     return {
       ok: false,
       conflictPath: file.relativePath

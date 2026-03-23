@@ -176,6 +176,31 @@ describe("workflow file generation", () => {
     expect(result.error).toContain("AGENTS.md");
   });
 
+  it("still blocks unmanaged files when overwriteManaged is enabled", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+    await writeFile(path.join(rootDir, "AGENTS.md"), "# User-owned file\n");
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: true,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    const agentsMd = await readFile(path.join(rootDir, "AGENTS.md"), "utf8");
+
+    expect(result.exitCode).toBe(3);
+    expect(result.error).toContain("AGENTS.md");
+    expect(agentsMd).toBe("# User-owned file\n");
+  });
+
   it("is idempotent when init runs twice with the same options", async () => {
     const rootDir = await createTempRepository();
     await createSupportedRepository(rootDir);
@@ -214,6 +239,67 @@ describe("workflow file generation", () => {
 
     expect(secondRun.exitCode).toBe(0);
     expect(secondAgentsMd).toBe(firstAgentsMd);
+  });
+
+  it("requires overwriteManaged to replace a changed managed file", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const firstRun = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(firstRun.exitCode).toBe(0);
+
+    const agentsPath = path.join(rootDir, "AGENTS.md");
+    const originalAgentsMd = await readFile(agentsPath, "utf8");
+
+    await writeFile(agentsPath, `${originalAgentsMd}\n<!-- user edit -->\n`);
+
+    const blockedRun = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(blockedRun.exitCode).toBe(3);
+
+    const preservedAgentsMd = await readFile(agentsPath, "utf8");
+    expect(preservedAgentsMd).toContain("user edit");
+
+    const overwriteRun = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: true,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    const restoredAgentsMd = await readFile(agentsPath, "utf8");
+
+    expect(overwriteRun.exitCode).toBe(0);
+    expect(restoredAgentsMd).toBe(originalAgentsMd);
   });
 
   it("adds performance files only when performance mode is enabled", async () => {
