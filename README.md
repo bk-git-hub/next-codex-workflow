@@ -53,6 +53,8 @@ npx next-codex-workflow init --performance --external-skill-set full
 ## Workflow Shortcuts
 
 Codex supports explicit skill invocation by mentioning a skill with `$`.
+If the user prefers a picker UI, they can also open `/skills` and choose one of
+the generated workflow skills there.
 This package generates a few command-like shortcut skills so users can trigger
 the workflow with short prompts instead of rewriting the same instructions.
 
@@ -67,6 +69,28 @@ $review-feature
 
 These are thin workflow entrypoints built on top of the generated planning,
 verification, and review agents plus the installed repo-local skills.
+
+## Subagent Workflow
+
+One of the main strengths of this package is that it prepares the repository
+for orchestrated multi-agent work.
+
+In practice, the main Codex session acts as the orchestrator:
+
+- it keeps the feature request and repo-level goal in view
+- it reads the workflow artifacts
+- it delegates focused jobs to subagents when helpful
+- it collects their results and returns one coherent outcome
+
+The generated custom agents support that workflow:
+
+- `planner` for planning artifacts
+- `verifier` for deterministic checks
+- `reviewer` for final review
+
+This is especially useful for larger changes where exploration, implementation,
+verification, and review benefit from being split into focused jobs. It is a
+quality and parallelism benefit, not a token-saving mode by itself.
 
 ## Flags
 

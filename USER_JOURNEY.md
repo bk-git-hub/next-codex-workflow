@@ -33,11 +33,33 @@ The normal user journey looks like this:
 
 1. run `npx next-codex-workflow init`
 2. open the repo in Codex
-3. use `$plan-feature` for non-trivial work
+3. use `$plan-feature` for non-trivial work, or open `/skills` and choose it
 4. approve the plan
 5. use `$build-feature` to implement it
 6. use `$verify-feature`
 7. use `$review-feature`
+
+## How To Invoke The Workflow
+
+Codex skills are explicitly invoked with `$skill-name`.
+
+For this product, that means:
+
+- `$plan-feature`
+- `$build-feature`
+- `$verify-feature`
+- `$review-feature`
+
+If the user prefers a picker-style interaction, they can open `/skills` and
+choose one of those generated skills.
+
+Important detail:
+
+- use `$plan-feature`
+- do not expect `/plan-feature`
+
+The built-in slash command is `/skills`, not a repo-defined custom slash command
+for each workflow step.
 
 ## Step 1: Start Inside An Existing Next.js Repo
 
@@ -117,6 +139,9 @@ Think of this as adding a reusable Codex operating system to the repo.
 This product generates short command-like skills so the user does not need to
 keep rewriting the same long instructions.
 
+The user can either type the skill directly with `$...` or open `/skills` and
+pick the same skill from the list.
+
 ### Planning
 
 Use this for non-trivial work:
@@ -180,6 +205,24 @@ What Codex should do:
 
 ## Step 6: Understand Where Subagents Fit
 
+Subagents are one of the strongest parts of this product.
+
+The main Codex session acts as the orchestrator. It keeps the full feature
+request, repository context, and workflow state in view, then delegates focused
+jobs to narrower workers when that helps.
+
+That means the overall flow is:
+
+1. the orchestrator owns the main task
+2. the orchestrator reads the workflow artifacts
+3. the orchestrator spawns focused subagents for bounded jobs
+4. subagents return results
+5. the orchestrator integrates the results and keeps the overall change coherent
+
+This is useful because it can reduce context sprawl in the main thread and let
+independent work happen in parallel. It is mainly a workflow-quality and
+parallelism benefit, not a guaranteed token-saving mode.
+
 Subagents are most useful during implementation, not during every single task.
 
 Typical pattern:
@@ -191,13 +234,18 @@ Typical pattern:
    - inspect existing code patterns
    - handle isolated UI work
    - handle isolated server/data work
-   - perform verification and review closeout
+   - prepare focused evidence for verification or review
+5. the orchestrator then uses the dedicated verification and review specialists
+   for closeout
 
 In the generated setup:
 
 - `planner` is the planning specialist
 - `verifier` is the deterministic checks specialist
 - `reviewer` is the final review specialist
+
+Those three are custom agents generated into `.codex/agents/`. The shortcut
+skills are the easy user-facing entrypoints that tell Codex when to use them.
 
 ## Step 7: Know When To Use The Structured Flow
 
@@ -273,6 +321,16 @@ $verify-feature
 ```text
 $review-feature
 ```
+
+The same journey using the built-in skill picker looks like:
+
+1. type `/skills`
+2. choose `plan-feature`
+3. approve the generated plan
+4. type `/skills`
+5. choose `build-feature`
+6. then run verification and review the same way or with `$verify-feature` and
+   `$review-feature`
 
 If the request is unclear:
 
