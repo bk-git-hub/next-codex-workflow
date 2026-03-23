@@ -106,6 +106,7 @@ describe("runInitCommand", () => {
     expect(result.mode).toBe("dry-run");
     expect(formatInitSummary(result)).toContain("Dry run requested. No files were written.");
     expect(formatInitSummary(result)).toContain("Detected package manager: npm.");
+    expect(result.actions.some((action) => action.endsWith("AGENTS.md"))).toBe(true);
   });
 
   it("returns an unsupported repository error with exit code 2", async () => {

@@ -1,6 +1,7 @@
 import process from "node:process";
 
 import { inspectRepository, type RepositoryInspection } from "../../detect/inspect-repository.js";
+import { writeTargetTree } from "../../generate/write-target-tree.js";
 
 export type ExternalSkillSet = "minimal" | "recommended" | "full";
 
@@ -23,6 +24,7 @@ export interface InitResult {
   warnings: string[];
   error: string | null;
   inspection: RepositoryInspection | null;
+  actions: string[];
 }
 
 type ParseResult =
@@ -161,7 +163,34 @@ export async function runInitCommand(
       notes: [],
       warnings: inspectionResult.warnings,
       error: inspectionResult.error,
-      inspection: null
+      inspection: null,
+      actions: []
+    };
+  }
+
+  const writeResult = await writeTargetTree(
+    targetDirectory,
+    {
+      inspection: inspectionResult.inspection,
+      options
+    },
+    {
+      dryRun: options.dryRun,
+      overwriteManaged: options.overwriteManaged
+    }
+  );
+
+  if (!writeResult.ok) {
+    return {
+      exitCode: 3,
+      mode: options.dryRun ? "dry-run" : "apply",
+      options,
+      targetDirectory,
+      notes: [],
+      warnings: inspectionResult.warnings,
+      error: `Conflicting unmanaged files detected: ${writeResult.conflictPaths.join(", ")}`,
+      inspection: inspectionResult.inspection,
+      actions: []
     };
   }
 
@@ -188,8 +217,14 @@ export async function runInitCommand(
   if (options.dryRun) {
     notes.unshift("Dry run requested. No files were written.");
   } else {
-    notes.push("Repository validation passed. File generation will be added in the next implementation step.");
+    notes.push(`Generated ${writeResult.actions.length} managed files.`);
   }
+
+  if (options.dryRun) {
+    notes.push(`Planned ${writeResult.actions.length} managed files.`);
+  }
+
+  const actions = writeResult.actions.map((action) => `${action.kind}: ${action.relativePath}`);
 
   return {
     exitCode: 0,
@@ -199,7 +234,8 @@ export async function runInitCommand(
     notes,
     warnings: inspectionResult.warnings,
     error: null,
-    inspection: inspectionResult.inspection
+    inspection: inspectionResult.inspection,
+    actions
   };
 }
 
@@ -231,6 +267,15 @@ export function formatInitSummary(result: InitResult): string {
 
   for (const note of result.notes) {
     lines.push(`- ${note}`);
+  }
+
+  if (result.actions.length > 0) {
+    lines.push("");
+    lines.push("Planned changes:");
+
+    for (const action of result.actions) {
+      lines.push(`- ${action}`);
+    }
   }
 
   return lines.join("\n");

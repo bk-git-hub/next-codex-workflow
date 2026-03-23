@@ -10,6 +10,9 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   splitting: false,
+  loader: {
+    ".hbs": "text"
+  },
   banner: {
     js: "#!/usr/bin/env node"
   }
