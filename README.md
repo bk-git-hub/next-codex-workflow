@@ -7,20 +7,94 @@ Repo-local Codex workflow installer for existing Next.js repositories.
 `v0.1` is implemented from
 `nextjs-codex-workflow-kit-implementation-spec-v0.1.md`.
 
+## What It Does
+
+`next-codex-workflow` prepares an existing Next.js repository so Codex can use
+a structured implementation workflow inside that repository.
+
+During `init`, it:
+
+- validates that the target repository is a supported Next.js project
+- detects router style, package manager, scripts, and TypeScript usage
+- generates a short `AGENTS.md` with repo-specific workflow rules
+- generates project-scoped Codex config and custom agents
+- generates repo-local skills for clarification, exploration, planning,
+  decision logging, verification, and review
+- vendors approved external skills into the repository
+- creates workflow artifact files as starter templates immediately during init
+- creates a deterministic verification script
+- optionally adds Lighthouse-based performance audit support
+
+## Supported Repositories
+
+`init` currently expects:
+
+- an existing `package.json`
+- `next` declared in dependencies or devDependencies
+- at least one of `app/`, `src/app/`, `pages/`, or `src/pages/`
+
 ## Usage
 
 ```bash
 npx next-codex-workflow init
 ```
 
-Supported flags:
+Example:
+
+```bash
+npx next-codex-workflow init --performance --external-skill-set full
+```
+
+## Flags
 
 - `--yes`
+  Accept defaults automatically. This is most noticeable when multiple package
+  manager lockfiles are found: instead of stopping, the installer uses the
+  built-in lockfile priority order and prints a warning.
 - `--performance`
+  Enables performance-mode generation. This adds the performance audit skill,
+  `agent-workflow/artifacts/PERF.md`, `scripts/run-lighthouse.mjs`,
+  `agent-workflow/config/lighthouserc.cjs`, and `agent-workflow/config/budgets.json`.
 - `--routes <comma-separated-routes>`
+  Sets the routes used by the generated Lighthouse performance workflow. This is
+  only meaningful together with `--performance`.
+
+  Example:
+
+  ```bash
+  npx next-codex-workflow init --performance --routes /,/dashboard,/settings
+  ```
 - `--external-skill-set <minimal|recommended|full>`
+  Controls how many bundled external skills are copied into the target
+  repository.
+
+  `minimal`
+  Core external skills only.
+
+  `recommended`
+  Core skills plus the supported design/component/composition skills.
+
+  `full`
+  Everything from `recommended`, plus optional eligible skills such as
+  `next-cache-components` for qualifying repositories.
 - `--overwrite-managed`
+  Allows `init` to overwrite generated target paths when you intentionally want
+  to replace existing files at those paths.
 - `--dry-run`
+  Prints the planned changes and validation results without writing any files.
+
+## External Skill Sets
+
+Current bundled presets:
+
+- `minimal`
+  `next-best-practices`, `vercel-react-best-practices`
+- `recommended`
+  everything in `minimal`, plus `building-components`,
+  `web-design-guidelines`, and `vercel-composition-patterns`
+- `full`
+  everything in `recommended`, plus eligible optional skills such as
+  `next-cache-components`
 
 ## What It Generates
 
@@ -40,6 +114,31 @@ default because this repository is the installer itself.
 - `agent-workflow/artifacts/PERF.md` when `--performance` is enabled
 - `scripts/verify-agent-workflow.mjs`
 - `scripts/run-lighthouse.mjs` when `--performance` is enabled
+
+## Workflow Artifacts
+
+These artifact files are created during `init` as starter templates, then
+updated later as Codex works through a feature:
+
+- `PLAN.md`
+  Implementation plan for non-trivial work.
+- `FILE_SPECS.md`
+  File-by-file responsibilities, boundaries, and expectations.
+- `DECISION.md`
+  Append-only log of explicit user choices between viable options.
+- `VERIFY.md`
+  Human-readable verification record after deterministic checks run.
+- `REVIEW.md`
+  Structured post-implementation review output.
+- `PERF.md`
+  Performance audit notes when performance mode is enabled.
+
+## What `init` Does Not Do
+
+- It does not implement application features for you during installation.
+- It does not fetch skills from the network during init.
+- It does not wait for a later user request to create the workflow artifact
+  files; the artifact files are created immediately as templates during init.
 
 ## Development Checks
 
