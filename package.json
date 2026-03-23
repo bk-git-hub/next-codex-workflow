@@ -13,7 +13,7 @@
   },
   "type": "module",
   "bin": {
-    "next-codex-workflow": "./dist/main.js"
+    "next-codex-workflow": "dist/main.js"
   },
   "files": [
     "dist",
