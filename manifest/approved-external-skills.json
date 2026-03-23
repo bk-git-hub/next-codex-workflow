@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "next-best-practices",
+      "source": "https://skills.sh/vercel-labs/next-skills/next-best-practices",
+      "pin": "snapshot-2026-03-23",
+      "policy": "core-implicit",
+      "preset": "core"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices",
+      "pin": "snapshot-2026-03-23",
+      "policy": "core-implicit",
+      "preset": "core"
+    },
+    {
+      "name": "building-components",
+      "source": "https://skills.sh/vercel/components.build/building-components",
+      "pin": "snapshot-2026-03-23",
+      "policy": "explicit-only",
+      "preset": "recommended"
+    },
+    {
+      "name": "web-design-guidelines",
+      "source": "https://skills.sh/vercel-labs/agent-skills/web-design-guidelines",
+      "pin": "snapshot-2026-03-23",
+      "policy": "explicit-only",
+      "preset": "recommended"
+    },
+    {
+      "name": "vercel-composition-patterns",
+      "source": "https://skills.sh/vercel-labs/agent-skills/vercel-composition-patterns",
+      "pin": "snapshot-2026-03-23",
+      "policy": "explicit-only",
+      "preset": "recommended"
+    },
+    {
+      "name": "next-cache-components",
+      "source": "https://skills.sh/vercel-labs/next-skills/next-cache-components",
+      "pin": "snapshot-2026-03-23",
+      "policy": "disabled-unless-enabled",
+      "preset": "optional"
+    }
+  ]
+}

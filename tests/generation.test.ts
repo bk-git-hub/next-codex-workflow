@@ -42,6 +42,11 @@ async function createSupportedRepository(rootDir: string): Promise<void> {
   await writeFile(path.join(rootDir, "tsconfig.json"), "{}");
   await mkdir(path.join(rootDir, "app"), { recursive: true });
   await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+  await mkdir(path.join(rootDir, "app", "dashboard"), { recursive: true });
+  await writeFile(
+    path.join(rootDir, "app", "dashboard", "page.tsx"),
+    "export default function Dashboard() { return null; }"
+  );
 }
 
 afterEach(async () => {
@@ -72,8 +77,20 @@ describe("workflow file generation", () => {
     const codexConfig = await readFile(path.join(rootDir, ".codex", "config.toml"), "utf8");
     const verifyScript = await readFile(path.join(rootDir, "scripts", "verify-agent-workflow.mjs"), "utf8");
     const planArtifact = await readFile(path.join(rootDir, "agent-workflow", "artifacts", "PLAN.md"), "utf8");
+    const managedRegistry = await readFile(
+      path.join(rootDir, "agent-workflow", "manifest", "managed-files.json"),
+      "utf8"
+    );
+    const skillsLock = await readFile(
+      path.join(rootDir, "agent-workflow", "manifest", "skills-lock.json"),
+      "utf8"
+    );
     const skillFile = await readFile(
       path.join(rootDir, ".agents", "skills", "task-clarification", "SKILL.md"),
+      "utf8"
+    );
+    const externalSkillFile = await readFile(
+      path.join(rootDir, ".agents", "skills", "next-best-practices", "SKILL.md"),
       "utf8"
     );
 
@@ -82,7 +99,10 @@ describe("workflow file generation", () => {
     expect(codexConfig).toContain("[agents.verifier]");
     expect(verifyScript).toContain("CHECK_ORDER");
     expect(planArtifact).toContain("# Task Summary");
+    expect(managedRegistry).toContain("\"paths\"");
+    expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillFile).toContain("name: task-clarification");
+    expect(externalSkillFile).toContain("name: next-best-practices");
   });
 
   it("does not write files during dry run", async () => {
@@ -167,5 +187,89 @@ describe("workflow file generation", () => {
 
     expect(secondRun.exitCode).toBe(0);
     expect(secondAgentsMd).toBe(firstAgentsMd);
+  });
+
+  it("adds performance files only when performance mode is enabled", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: true,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(result.exitCode).toBe(0);
+
+    const perfArtifact = await readFile(path.join(rootDir, "agent-workflow", "artifacts", "PERF.md"), "utf8");
+    const lighthouseConfig = await readFile(
+      path.join(rootDir, "agent-workflow", "config", "lighthouserc.cjs"),
+      "utf8"
+    );
+    const lighthouseScript = await readFile(path.join(rootDir, "scripts", "run-lighthouse.mjs"), "utf8");
+    const performanceSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "performance-lighthouse-audit", "SKILL.md"),
+      "utf8"
+    );
+
+    expect(perfArtifact).toContain("# Audited Routes");
+    expect(lighthouseConfig).toContain('"/dashboard"');
+    expect(lighthouseScript).toContain("auditedRoutes");
+    expect(performanceSkill).toContain("name: performance-lighthouse-audit");
+  });
+
+  it("selects external skills by preset and eligibility", async () => {
+    const minimalRoot = await createTempRepository();
+    await createSupportedRepository(minimalRoot);
+
+    const minimalResult = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "minimal",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: minimalRoot }
+    );
+
+    expect(minimalResult.exitCode).toBe(0);
+    await expect(
+      readFile(path.join(minimalRoot, ".agents", "skills", "web-design-guidelines", "SKILL.md"), "utf8")
+    ).rejects.toThrow();
+
+    const fullRoot = await createTempRepository();
+    await createSupportedRepository(fullRoot);
+
+    const fullResult = await runInitCommand(
+      {
+        yes: false,
+        performance: true,
+        routes: [],
+        externalSkillSet: "full",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: fullRoot }
+    );
+
+    expect(fullResult.exitCode).toBe(0);
+
+    const optionalSkill = await readFile(
+      path.join(fullRoot, ".agents", "skills", "next-cache-components", "SKILL.md"),
+      "utf8"
+    );
+
+    expect(optionalSkill).toContain("name: next-cache-components");
   });
 });

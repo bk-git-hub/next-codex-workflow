@@ -2,20 +2,36 @@ import { generateAgentFiles } from "./generate-agent-files.js";
 import { generateAgentsMd } from "./generate-agents-md.js";
 import { generateArtifacts } from "./generate-artifacts.js";
 import { generateCodexConfig } from "./generate-codex-config.js";
+import { generateExternalSkillFiles, generateSkillsLockFile } from "./generate-external-skills.js";
 import { generateInternalSkills } from "./generate-internal-skills.js";
+import { generatePerformanceFiles } from "./generate-performance-files.js";
 import { generateVerifyScriptFiles } from "./generate-verify-script.js";
 import type { GenerationContext, GeneratedFile, WriteAction } from "./types.js";
+import { MANAGED_REGISTRY_PATH, loadManagedRegistry, serializeManagedRegistry } from "./managed-registry.js";
 import { commitManagedWrite, prepareManagedWrite } from "./write-managed-file.js";
 
-function buildTargetFiles(context: GenerationContext): GeneratedFile[] {
-  return [
+async function buildTargetFiles(context: GenerationContext): Promise<GeneratedFile[]> {
+  const externalSkills = await generateExternalSkillFiles(context);
+  const skillsLockFile = generateSkillsLockFile(externalSkills.installedSkills);
+  const files: GeneratedFile[] = [
     generateAgentsMd(context),
     generateCodexConfig(),
     ...generateAgentFiles(),
     ...generateInternalSkills(),
     ...generateVerifyScriptFiles(),
-    ...generateArtifacts()
+    ...generateArtifacts(),
+    ...externalSkills.files
   ];
+
+  if (skillsLockFile) {
+    files.push(skillsLockFile);
+  }
+
+  if (context.options.performance) {
+    files.push(...generatePerformanceFiles(context));
+  }
+
+  return files;
 }
 
 export async function writeTargetTree(
@@ -23,12 +39,14 @@ export async function writeTargetTree(
   context: GenerationContext,
   options: { dryRun: boolean; overwriteManaged: boolean }
 ): Promise<{ ok: true; actions: WriteAction[] } | { ok: false; conflictPaths: string[] }> {
+  const managedPaths = await loadManagedRegistry(rootDir);
   const preparedWrites = [];
   const conflictPaths: string[] = [];
 
-  for (const file of buildTargetFiles(context)) {
+  for (const file of await buildTargetFiles(context)) {
     const prepared = await prepareManagedWrite(rootDir, file, {
-      overwriteManaged: options.overwriteManaged
+      overwriteManaged: options.overwriteManaged,
+      managedPaths
     });
 
     if (!prepared.ok) {
@@ -45,6 +63,28 @@ export async function writeTargetTree(
       conflictPaths
     };
   }
+
+  const managedRegistryPaths = [...new Set([...preparedWrites.map((write) => write.action.relativePath), MANAGED_REGISTRY_PATH])].sort();
+  const registryWrite = await prepareManagedWrite(
+    rootDir,
+    {
+      relativePath: MANAGED_REGISTRY_PATH,
+      content: `${serializeManagedRegistry(managedRegistryPaths)}\n`
+    },
+    {
+      overwriteManaged: true,
+      managedPaths
+    }
+  );
+
+  if (!registryWrite.ok) {
+    return {
+      ok: false,
+      conflictPaths: [registryWrite.conflictPath]
+    };
+  }
+
+  preparedWrites.push(registryWrite.preparedWrite);
 
   if (!options.dryRun) {
     for (const preparedWrite of preparedWrites) {

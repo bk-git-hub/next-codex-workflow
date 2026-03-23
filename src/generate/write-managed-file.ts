@@ -13,7 +13,7 @@ export interface PreparedWrite {
 export async function prepareManagedWrite(
   rootDir: string,
   file: GeneratedFile,
-  options: { overwriteManaged: boolean }
+  options: { overwriteManaged: boolean; managedPaths: Set<string> }
 ): Promise<{ ok: true; preparedWrite: PreparedWrite } | { ok: false; conflictPath: string }> {
   const absolutePath = resolveFrom(rootDir, file.relativePath);
   const exists = await pathExists(absolutePath);
@@ -30,7 +30,8 @@ export async function prepareManagedWrite(
   }
 
   const existingContent = await readFile(absolutePath, "utf8");
-  const isManaged = existingContent.includes(MANAGED_FILE_MARKER);
+  const isManaged =
+    existingContent.includes(MANAGED_FILE_MARKER) || options.managedPaths.has(file.relativePath);
 
   if (!isManaged && !options.overwriteManaged) {
     return {

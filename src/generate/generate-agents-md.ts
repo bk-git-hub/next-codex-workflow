@@ -17,7 +17,8 @@ function formatCommands(context: GenerationContext): string {
     context.inspection.scripts.test ? `- Test: \`${formatScriptCommand(packageManager, "test")}\`` : null,
     context.inspection.scripts.typecheck
       ? `- Typecheck: \`${formatScriptCommand(packageManager, "typecheck")}\``
-      : null
+      : null,
+    context.options.performance ? "- Performance audit: `node scripts/run-lighthouse.mjs`" : null
   ].filter((value): value is string => value !== null);
 
   return commands.join("\n");
@@ -32,19 +33,30 @@ function formatRouterStyle(context: GenerationContext): string {
 }
 
 export function generateAgentsMd(context: GenerationContext): GeneratedFile {
+  const workflowArtifacts = [
+    "- `agent-workflow/artifacts/PLAN.md`",
+    "- `agent-workflow/artifacts/FILE_SPECS.md`",
+    "- `agent-workflow/artifacts/DECISION.md`",
+    "- `agent-workflow/artifacts/VERIFY.md`",
+    "- `agent-workflow/artifacts/REVIEW.md`"
+  ];
+
+  if (context.options.performance) {
+    workflowArtifacts.push("- `agent-workflow/artifacts/PERF.md`");
+  }
+
+  const performanceRule = context.options.performance
+    ? "7. If performance mode is enabled and user-facing routes changed, run performance audit and update `PERF.md`.\n8. Final summaries must reference workflow artifact outputs."
+    : "7. Final summaries must reference workflow artifact outputs.";
+
   return {
     relativePath: "AGENTS.md",
     content: renderTemplate(agentsTemplate, {
       routerStyle: formatRouterStyle(context),
       sourceRoots: formatSourceRoots(context),
       commands: formatCommands(context),
-      workflowArtifacts: [
-        "- `agent-workflow/artifacts/PLAN.md`",
-        "- `agent-workflow/artifacts/FILE_SPECS.md`",
-        "- `agent-workflow/artifacts/DECISION.md`",
-        "- `agent-workflow/artifacts/VERIFY.md`",
-        "- `agent-workflow/artifacts/REVIEW.md`"
-      ].join("\n")
+      workflowArtifacts: workflowArtifacts.join("\n"),
+      performanceRule
     })
   };
 }
