@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Repo-local Codex workflow installer for existing Next.js repositories with planning artifacts, subagents, and command-style skills.",
   "author": "bk-git-hub <bkprivate99@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bk-git-hub/next-codex-workflow.git"
+  },
+  "homepage": "https://github.com/bk-git-hub/next-codex-workflow#readme",
+  "bugs": {
+    "url": "https://github.com/bk-git-hub/next-codex-workflow/issues"
+  },
   "type": "module",
   "bin": {
     "next-codex-workflow": "./dist/main.js"
@@ -36,6 +44,9 @@
   },
   "engines": {
     "node": ">=18.18.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",
