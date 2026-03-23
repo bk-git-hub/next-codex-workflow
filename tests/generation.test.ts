@@ -93,6 +93,14 @@ describe("workflow file generation", () => {
       path.join(rootDir, ".agents", "skills", "next-best-practices", "SKILL.md"),
       "utf8"
     );
+    const planFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"),
+      "utf8"
+    );
+    const buildFeatureMetadata = await readFile(
+      path.join(rootDir, ".agents", "skills", "build-feature", "agents", "openai.yaml"),
+      "utf8"
+    );
     const externalSkillReference = await readFile(
       path.join(rootDir, ".agents", "skills", "next-best-practices", "file-conventions.md"),
       "utf8"
@@ -125,6 +133,8 @@ describe("workflow file generation", () => {
     expect(managedRegistry).toContain("\"paths\"");
     expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillFile).toContain("name: task-clarification");
+    expect(planFeatureSkill).toContain("Use the `planner` custom agent");
+    expect(buildFeatureMetadata).toContain("$build-feature");
     expect(externalSkillFile).toContain("name: next-best-practices");
     expect(externalSkillReference).toContain("## Project Structure");
     expect(reactRule).toContain("Promise.all()");

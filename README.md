@@ -20,6 +20,8 @@ During `init`, it:
 - generates project-scoped Codex config and custom agents
 - generates repo-local skills for clarification, exploration, planning,
   decision logging, verification, and review
+- generates short `$skill-name` workflow shortcuts so users do not need to keep
+  retyping long Codex prompts
 - vendors approved external skills into the repository from bundled snapshots
   shipped with this package
 - creates workflow artifact files as starter templates immediately during init
@@ -45,6 +47,24 @@ Example:
 ```bash
 npx next-codex-workflow init --performance --external-skill-set full
 ```
+
+## Workflow Shortcuts
+
+Codex supports explicit skill invocation by mentioning a skill with `$`.
+This package generates a few command-like shortcut skills so users can trigger
+the workflow with short prompts instead of rewriting the same instructions.
+
+Examples after `init` in the target repository:
+
+```text
+$plan-feature add saved search filters to the dashboard
+$build-feature implement the approved dashboard filters plan
+$verify-feature
+$review-feature
+```
+
+These are thin workflow entrypoints built on top of the generated planning,
+verification, and review agents plus the installed repo-local skills.
 
 ## Flags
 
