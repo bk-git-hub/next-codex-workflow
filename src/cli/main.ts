@@ -1,0 +1,91 @@
+import { pathToFileURL } from "node:url";
+import process from "node:process";
+
+import { formatInitSummary, parseInitArgs, runInitCommand } from "./commands/init.js";
+
+export interface CliIO {
+  stdout: (message: string) => void;
+  stderr: (message: string) => void;
+}
+
+const defaultIO: CliIO = {
+  stdout: (message) => {
+    process.stdout.write(`${message}\n`);
+  },
+  stderr: (message) => {
+    process.stderr.write(`${message}\n`);
+  }
+};
+
+function formatHelp(): string {
+  return [
+    "next-codex-workflow",
+    "",
+    "Usage:",
+    "  next-codex-workflow init [options]",
+    "",
+    "Options:",
+    "  --yes",
+    "  --performance",
+    "  --routes <comma-separated-routes>",
+    "  --external-skill-set <minimal|recommended|full>",
+    "  --overwrite-managed",
+    "  --dry-run",
+    "  --help",
+    "  --version"
+  ].join("\n");
+}
+
+export async function runCli(argv: string[], io: CliIO = defaultIO): Promise<number> {
+  const [command, ...commandArgs] = argv;
+
+  if (!command || command === "--help" || command === "-h") {
+    io.stdout(formatHelp());
+    return 0;
+  }
+
+  if (command === "--version" || command === "-v") {
+    io.stdout("0.1.0");
+    return 0;
+  }
+
+  if (command !== "init") {
+    io.stderr(`Unknown command: ${command}`);
+    io.stderr("");
+    io.stderr(formatHelp());
+    return 1;
+  }
+
+  const parsed = parseInitArgs(commandArgs);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    return 1;
+  }
+
+  if (parsed.options.help) {
+    io.stdout(formatHelp());
+    return 0;
+  }
+
+  const result = await runInitCommand(parsed.options);
+
+  io.stdout(formatInitSummary(result));
+  return result.exitCode;
+}
+
+function isDirectExecution(): boolean {
+  const entryPath = process.argv[1];
+
+  if (!entryPath) {
+    return false;
+  }
+
+  return import.meta.url === pathToFileURL(entryPath).href;
+}
+
+if (isDirectExecution()) {
+  void runCli(process.argv.slice(2)).then((exitCode) => {
+    process.exitCode = exitCode;
+  });
+}
