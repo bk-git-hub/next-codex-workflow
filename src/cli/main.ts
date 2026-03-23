@@ -8,6 +8,10 @@ export interface CliIO {
   stderr: (message: string) => void;
 }
 
+export interface CliEnvironment {
+  cwd: string;
+}
+
 const defaultIO: CliIO = {
   stdout: (message) => {
     process.stdout.write(`${message}\n`);
@@ -36,7 +40,11 @@ function formatHelp(): string {
   ].join("\n");
 }
 
-export async function runCli(argv: string[], io: CliIO = defaultIO): Promise<number> {
+export async function runCli(
+  argv: string[],
+  io: CliIO = defaultIO,
+  environment: CliEnvironment = { cwd: process.cwd() }
+): Promise<number> {
   const [command, ...commandArgs] = argv;
 
   if (!command || command === "--help" || command === "-h") {
@@ -68,7 +76,7 @@ export async function runCli(argv: string[], io: CliIO = defaultIO): Promise<num
     return 0;
   }
 
-  const result = await runInitCommand(parsed.options);
+  const result = await runInitCommand(parsed.options, { cwd: environment.cwd });
 
   io.stdout(formatInitSummary(result));
   return result.exitCode;
