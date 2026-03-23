@@ -24,11 +24,20 @@ Supported flags:
 
 ## What It Generates
 
+The files below are generated into the target Next.js repository when you run
+`npx next-codex-workflow init`. They do not exist in this package repository by
+default because this repository is the installer itself.
+
 - `AGENTS.md`
 - `.codex/config.toml`
 - `.codex/agents/*`
 - `.agents/skills/*`
-- `agent-workflow/artifacts/*`
+- `agent-workflow/artifacts/PLAN.md`
+- `agent-workflow/artifacts/FILE_SPECS.md`
+- `agent-workflow/artifacts/DECISION.md`
+- `agent-workflow/artifacts/VERIFY.md`
+- `agent-workflow/artifacts/REVIEW.md`
+- `agent-workflow/artifacts/PERF.md` when `--performance` is enabled
 - `scripts/verify-agent-workflow.mjs`
 - `scripts/run-lighthouse.mjs` when `--performance` is enabled
 
