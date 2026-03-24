@@ -1,5 +1,6 @@
 import process from "node:process";
 
+import { detectCodexMultiAgent } from "../../detect/detect-codex-multi-agent.js";
 import { inspectRepository, type RepositoryInspection } from "../../detect/inspect-repository.js";
 import { writeTargetTree } from "../../generate/write-target-tree.js";
 
@@ -149,7 +150,7 @@ function formatDetectedScripts(inspection: RepositoryInspection): string {
 
 export async function runInitCommand(
   options: InitOptions,
-  context: { cwd?: string } = {}
+  context: { cwd?: string; homeDir?: string } = {}
 ): Promise<InitResult> {
   const targetDirectory = context.cwd ?? process.cwd();
   const inspectionResult = await inspectRepository(targetDirectory, { yes: options.yes });
@@ -194,6 +195,7 @@ export async function runInitCommand(
     };
   }
 
+  const codexMultiAgentStatus = await detectCodexMultiAgent(context.homeDir);
   const notes = [
     `Detected package manager: ${inspectionResult.inspection.packageManager.packageManager ?? "unknown"}.`,
     `Detected router style: ${formatRouterStyle(inspectionResult.inspection)}.`,
@@ -211,6 +213,20 @@ export async function runInitCommand(
   if (options.performance && !inspectionResult.inspection.performance.eligible) {
     notes.push(
       `Performance generation will need follow-up: ${inspectionResult.inspection.performance.reasons.join(" ")}`
+    );
+  }
+
+  if (codexMultiAgentStatus.enabled) {
+    notes.push(`Detected Codex multi-agent: enabled in ${codexMultiAgentStatus.configPath}.`);
+  }
+
+  notes.push("Open a new Codex session in this repository after init so the generated repo-local skills are loaded.");
+
+  const warnings = [...inspectionResult.warnings];
+
+  if (!codexMultiAgentStatus.enabled) {
+    warnings.push(
+      `Codex multi-agent is not enabled in ${codexMultiAgentStatus.configPath}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
     );
   }
 
@@ -232,7 +248,7 @@ export async function runInitCommand(
     options,
     targetDirectory,
     notes,
-    warnings: inspectionResult.warnings,
+    warnings,
     error: null,
     inspection: inspectionResult.inspection,
     actions

@@ -14,6 +14,12 @@ async function createTempRepository(): Promise<string> {
   return tempRoot;
 }
 
+async function createTempHomeDirectory(): Promise<string> {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "next-codex-workflow-home-"));
+  createdDirectories.push(tempRoot);
+  return tempRoot;
+}
+
 afterEach(async () => {
   await Promise.all(createdDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
@@ -70,6 +76,7 @@ describe("parseInitArgs", () => {
 describe("runInitCommand", () => {
   it("returns a dry-run summary for a supported repository", async () => {
     const rootDir = await createTempRepository();
+    const homeDir = await createTempHomeDirectory();
 
     await writeFile(
       path.join(rootDir, "package.json"),
@@ -100,13 +107,67 @@ describe("runInitCommand", () => {
       overwriteManaged: false,
       dryRun: true,
       help: false
-    }, { cwd: rootDir });
+    }, { cwd: rootDir, homeDir });
 
     expect(result.exitCode).toBe(0);
     expect(result.mode).toBe("dry-run");
     expect(formatInitSummary(result)).toContain("Dry run requested. No files were written.");
     expect(formatInitSummary(result)).toContain("Detected package manager: npm.");
+    expect(result.warnings).toContain(
+      `Codex multi-agent is not enabled in ${path.join(homeDir, ".codex", "config.toml")}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
+    );
     expect(result.actions.some((action) => action.endsWith("AGENTS.md"))).toBe(true);
+  });
+
+  it("notes when Codex multi-agent is already enabled", async () => {
+    const rootDir = await createTempRepository();
+    const homeDir = await createTempHomeDirectory();
+
+    await mkdir(path.join(homeDir, ".codex"), { recursive: true });
+    await writeFile(
+      path.join(homeDir, ".codex", "config.toml"),
+      ['model = "gpt-5.4"', "[features]", "multi_agent = true", ""].join("\n")
+    );
+
+    await writeFile(
+      path.join(rootDir, "package.json"),
+      JSON.stringify(
+        {
+          dependencies: {
+            next: "^16.0.0"
+          },
+          scripts: {
+            dev: "next dev",
+            build: "next build",
+            lint: "eslint ."
+          }
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(path.join(rootDir, "package-lock.json"), "");
+    await mkdir(path.join(rootDir, "app"), { recursive: true });
+    await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: false,
+        dryRun: true,
+        help: false
+      },
+      { cwd: rootDir, homeDir }
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.notes).toContain(`Detected Codex multi-agent: enabled in ${path.join(homeDir, ".codex", "config.toml")}.`);
+    expect(result.warnings).not.toContain(
+      `Codex multi-agent is not enabled in ${path.join(homeDir, ".codex", "config.toml")}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
+    );
   });
 
   it("returns an unsupported repository error with exit code 2", async () => {
