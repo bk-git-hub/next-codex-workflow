@@ -43,24 +43,24 @@ async function detectPackageManager() {
 function commandForScript(packageManager, scriptName) {
   switch (packageManager) {
     case "pnpm":
-      return { command: "pnpm", args: [scriptName] };
+      return { command: "pnpm", args: [scriptName], shell: process.platform === "win32" };
     case "yarn":
-      return { command: "yarn", args: [scriptName] };
+      return { command: "yarn", args: [scriptName], shell: process.platform === "win32" };
     case "bun":
-      return { command: "bun", args: ["run", scriptName] };
+      return { command: "bun", args: ["run", scriptName], shell: process.platform === "win32" };
     case "npm":
     default:
-      return { command: "npm", args: ["run", scriptName] };
+      return { command: "npm", args: ["run", scriptName], shell: process.platform === "win32" };
   }
 }
 
-async function runCommand(command, args) {
+async function runCommand(command, args, options = {}) {
   const startedAt = Date.now();
 
   return await new Promise((resolve) => {
     const child = spawn(command, args, {
       cwd: process.cwd(),
-      shell: process.platform === "win32",
+      shell: options.shell ?? false,
       stdio: ["ignore", "pipe", "pipe"]
     });
 
@@ -105,7 +105,8 @@ async function resolveTypecheckFallback(packageJson) {
   return {
     label: "typecheck",
     command: process.execPath,
-    args: [localTscPath, "--noEmit"]
+    args: [localTscPath, "--noEmit"],
+    shell: false
   };
 }
 
@@ -130,7 +131,7 @@ async function main() {
         continue;
       }
 
-      const fallbackResult = await runCommand(fallback.command, fallback.args);
+      const fallbackResult = await runCommand(fallback.command, fallback.args, { shell: fallback.shell });
 
       results.push({
         label,
@@ -154,7 +155,7 @@ async function main() {
     }
 
     const scriptCommand = commandForScript(packageManager, label);
-    const execution = await runCommand(scriptCommand.command, scriptCommand.args);
+    const execution = await runCommand(scriptCommand.command, scriptCommand.args, { shell: scriptCommand.shell });
 
     results.push({
       label,

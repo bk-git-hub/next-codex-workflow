@@ -1,6 +1,8 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
+import { spawn } from "node:child_process";
 
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -47,6 +49,39 @@ async function createSupportedRepository(rootDir: string): Promise<void> {
     path.join(rootDir, "app", "dashboard", "page.tsx"),
     "export default function Dashboard() { return null; }"
   );
+}
+
+async function runNodeCommand(command: string, args: string[], cwd: string): Promise<{
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}> {
+  return await new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    child.on("error", reject);
+    child.on("close", (code) => {
+      resolve({
+        exitCode: code ?? 1,
+        stdout,
+        stderr
+      });
+    });
+  });
 }
 
 afterEach(async () => {
@@ -369,6 +404,78 @@ describe("workflow file generation", () => {
     expect(lighthouseConfig).toContain('"/dashboard"');
     expect(lighthouseScript).toContain("auditedRoutes");
     expect(performanceSkill).toContain("name: performance-lighthouse-audit");
+  });
+
+  it("runs the local TypeScript fallback without shell quoting issues on Windows", async () => {
+    const rootDir = await createTempRepository();
+    await writeFile(
+      path.join(rootDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "fixture-typecheck-fallback",
+          dependencies: {
+            next: "^16.0.0",
+            react: "^19.0.0"
+          },
+          devDependencies: {
+            typescript: "^5.9.0"
+          },
+          scripts: {}
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(path.join(rootDir, "package-lock.json"), "");
+    await writeFile(path.join(rootDir, "tsconfig.json"), "{}");
+    await mkdir(path.join(rootDir, "app"), { recursive: true });
+    await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+    await mkdir(path.join(rootDir, "node_modules", "typescript", "bin"), { recursive: true });
+    await writeFile(
+      path.join(rootDir, "node_modules", "typescript", "bin", "tsc"),
+      [
+        "#!/usr/bin/env node",
+        "process.stdout.write('fallback tsc ok\\n');"
+      ].join("\n")
+    );
+
+    const initResult = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(initResult.exitCode).toBe(0);
+
+    const execution = await runNodeCommand(
+      process.execPath,
+      [path.join(rootDir, "scripts", "verify-agent-workflow.mjs")],
+      rootDir
+    );
+
+    expect(execution.exitCode).toBe(0);
+
+    const parsed = JSON.parse(execution.stdout);
+    expect(parsed.blocking).toBe(false);
+    expect(parsed.results).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "typecheck",
+          status: "passed"
+        })
+      ])
+    );
+
+    const typecheckResult = parsed.results.find((result: { label: string }) => result.label === "typecheck");
+
+    expect(typecheckResult.summary).toContain("fallback tsc ok");
   });
 
   it("selects external skills by preset and eligibility", async () => {
