@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { formatInitSummary, parseInitArgs, runInitCommand } from "../src/cli/commands/init.js";
 
@@ -228,6 +228,110 @@ describe("runInitCommand", () => {
     expect(result.warnings).not.toContain(
       `Codex multi-agent is not enabled in ${path.join(homeDir, ".codex", "config.toml")}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
     );
+  });
+
+  it("uses the interactive installer selections when a prompter is provided", async () => {
+    const rootDir = await createTempRepository();
+
+    await writeFile(
+      path.join(rootDir, "package.json"),
+      JSON.stringify(
+        {
+          dependencies: {
+            next: "^16.0.0"
+          },
+          scripts: {
+            dev: "next dev",
+            build: "next build",
+            lint: "eslint ."
+          }
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(path.join(rootDir, "package-lock.json"), "");
+    await mkdir(path.join(rootDir, "app"), { recursive: true });
+    await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+
+    const prompter = vi.fn(async () => ({
+      workflowMode: "single-agent" as const,
+      externalSkillSet: "full" as const,
+      performance: true,
+      routes: ["/", "/dashboard"]
+    }));
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
+        overwriteManaged: false,
+        dryRun: true,
+        help: false
+      },
+      { cwd: rootDir, prompter }
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(prompter).toHaveBeenCalledOnce();
+    expect(result.options.workflowMode).toBe("single-agent");
+    expect(result.options.externalSkillSet).toBe("full");
+    expect(result.options.performance).toBe(true);
+    expect(result.options.routes).toEqual(["/", "/dashboard"]);
+  });
+
+  it("skips the interactive installer when --yes is used", async () => {
+    const rootDir = await createTempRepository();
+
+    await writeFile(
+      path.join(rootDir, "package.json"),
+      JSON.stringify(
+        {
+          dependencies: {
+            next: "^16.0.0"
+          },
+          scripts: {
+            dev: "next dev",
+            build: "next build",
+            lint: "eslint ."
+          }
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(path.join(rootDir, "package-lock.json"), "");
+    await mkdir(path.join(rootDir, "app"), { recursive: true });
+    await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+
+    const prompter = vi.fn(async () => ({
+      workflowMode: "single-agent" as const,
+      externalSkillSet: "full" as const,
+      performance: true,
+      routes: ["/", "/dashboard"]
+    }));
+
+    const result = await runInitCommand(
+      {
+        yes: true,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
+        overwriteManaged: false,
+        dryRun: true,
+        help: false
+      },
+      { cwd: rootDir, prompter }
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(prompter).not.toHaveBeenCalled();
+    expect(result.options.workflowMode).toBe("multi-agent");
+    expect(result.options.externalSkillSet).toBe("recommended");
   });
 
   it("returns an unsupported repository error with exit code 2", async () => {

@@ -98,6 +98,10 @@ Basic install:
 npx next-codex-workflow init
 ```
 
+In a normal terminal session, this opens a short interactive installer so the
+user can choose workflow mode, external skill set, and optional performance
+setup.
+
 Example with more features:
 
 ```bash
@@ -108,6 +112,12 @@ Example with the single-agent workflow mode:
 
 ```bash
 npx next-codex-workflow init --workflow-mode single-agent
+```
+
+If the user wants the old non-interactive path, use:
+
+```bash
+npx next-codex-workflow init --yes
 ```
 
 What happens during `init`:

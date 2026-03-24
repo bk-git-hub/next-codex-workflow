@@ -3,6 +3,8 @@ import process from "node:process";
 import { detectCodexMultiAgent } from "../../detect/detect-codex-multi-agent.js";
 import { inspectRepository, type RepositoryInspection } from "../../detect/inspect-repository.js";
 import { writeTargetTree } from "../../generate/write-target-tree.js";
+import type { InitPrompter } from "./prompt-init-options.js";
+import { promptInitOptions } from "./prompt-init-options.js";
 
 export type ExternalSkillSet = "minimal" | "recommended" | "full";
 export type WorkflowMode = "single-agent" | "multi-agent";
@@ -168,16 +170,26 @@ function formatDetectedScripts(inspection: RepositoryInspection): string {
 
 export async function runInitCommand(
   options: InitOptions,
-  context: { cwd?: string; homeDir?: string } = {}
+  context: { cwd?: string; homeDir?: string; prompter?: InitPrompter } = {}
 ): Promise<InitResult> {
   const targetDirectory = context.cwd ?? process.cwd();
-  const inspectionResult = await inspectRepository(targetDirectory, { yes: options.yes });
+  let resolvedOptions = options;
+
+  if (!options.yes && (context.prompter || (process.stdin.isTTY && process.stdout.isTTY))) {
+    const promptResult = await (context.prompter ?? promptInitOptions)(options);
+    resolvedOptions = {
+      ...options,
+      ...promptResult
+    };
+  }
+
+  const inspectionResult = await inspectRepository(targetDirectory, { yes: resolvedOptions.yes });
 
   if (!inspectionResult.ok) {
     return {
       exitCode: inspectionResult.exitCode,
-      mode: options.dryRun ? "dry-run" : "apply",
-      options,
+      mode: resolvedOptions.dryRun ? "dry-run" : "apply",
+      options: resolvedOptions,
       targetDirectory,
       notes: [],
       warnings: inspectionResult.warnings,
@@ -191,19 +203,19 @@ export async function runInitCommand(
     targetDirectory,
     {
       inspection: inspectionResult.inspection,
-      options
+      options: resolvedOptions
     },
     {
-      dryRun: options.dryRun,
-      overwriteManaged: options.overwriteManaged
+      dryRun: resolvedOptions.dryRun,
+      overwriteManaged: resolvedOptions.overwriteManaged
     }
   );
 
   if (!writeResult.ok) {
     return {
       exitCode: 3,
-      mode: options.dryRun ? "dry-run" : "apply",
-      options,
+      mode: resolvedOptions.dryRun ? "dry-run" : "apply",
+      options: resolvedOptions,
       targetDirectory,
       notes: [],
       warnings: inspectionResult.warnings,
@@ -215,7 +227,7 @@ export async function runInitCommand(
 
   const codexMultiAgentStatus = await detectCodexMultiAgent(context.homeDir);
   const notes = [
-    `Workflow mode: ${options.workflowMode}.`,
+    `Workflow mode: ${resolvedOptions.workflowMode}.`,
     `Detected package manager: ${inspectionResult.inspection.packageManager.packageManager ?? "unknown"}.`,
     `Detected router style: ${formatRouterStyle(inspectionResult.inspection)}.`,
     `Detected scripts: ${formatDetectedScripts(inspectionResult.inspection)}.`,
@@ -229,13 +241,13 @@ export async function runInitCommand(
     );
   }
 
-  if (options.performance && !inspectionResult.inspection.performance.eligible) {
+  if (resolvedOptions.performance && !inspectionResult.inspection.performance.eligible) {
     notes.push(
       `Performance generation will need follow-up: ${inspectionResult.inspection.performance.reasons.join(" ")}`
     );
   }
 
-  if (options.workflowMode === "multi-agent" && codexMultiAgentStatus.enabled) {
+  if (resolvedOptions.workflowMode === "multi-agent" && codexMultiAgentStatus.enabled) {
     notes.push(`Detected Codex multi-agent: enabled in ${codexMultiAgentStatus.configPath}.`);
   }
 
@@ -243,19 +255,19 @@ export async function runInitCommand(
 
   const warnings = [...inspectionResult.warnings];
 
-  if (options.workflowMode === "multi-agent" && !codexMultiAgentStatus.enabled) {
+  if (resolvedOptions.workflowMode === "multi-agent" && !codexMultiAgentStatus.enabled) {
     warnings.push(
       `Codex multi-agent is not enabled in ${codexMultiAgentStatus.configPath}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
     );
   }
 
-  if (options.dryRun) {
+  if (resolvedOptions.dryRun) {
     notes.unshift("Dry run requested. No files were written.");
   } else {
     notes.push(`Generated ${writeResult.actions.length} managed files.`);
   }
 
-  if (options.dryRun) {
+  if (resolvedOptions.dryRun) {
     notes.push(`Planned ${writeResult.actions.length} managed files.`);
   }
 
@@ -263,8 +275,8 @@ export async function runInitCommand(
 
   return {
     exitCode: 0,
-    mode: options.dryRun ? "dry-run" : "apply",
-    options,
+    mode: resolvedOptions.dryRun ? "dry-run" : "apply",
+    options: resolvedOptions,
     targetDirectory,
     notes,
     warnings,

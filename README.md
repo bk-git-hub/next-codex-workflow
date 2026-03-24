@@ -48,6 +48,9 @@ During `init`, it:
 npx next-codex-workflow init
 ```
 
+When run in a normal terminal without `--yes`, `init` now guides the user
+through workflow mode, skill preset, and optional performance setup.
+
 After upgrading the package in a repo that already uses this workflow:
 
 ```bash
@@ -121,9 +124,9 @@ quality and parallelism benefit, not a token-saving mode by itself.
 ## Flags
 
 - `--yes`
-  Accept defaults automatically. This is most noticeable when multiple package
-  manager lockfiles are found: instead of stopping, the installer uses the
-  built-in lockfile priority order and prints a warning.
+  Accept defaults automatically and skip the interactive installer prompts. This
+  is the non-interactive path for scripts, CI, or quick setup. The default path
+  uses `multi-agent` workflow mode and the `recommended` external skill preset.
 - `--performance`
   Enables performance-mode generation. This adds the performance audit skill,
   `agent-workflow/artifacts/PERF.md`, `scripts/run-lighthouse.mjs`,
