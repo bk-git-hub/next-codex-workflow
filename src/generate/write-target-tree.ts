@@ -3,6 +3,7 @@ import { generateAgentsMd } from "./generate-agents-md.js";
 import { generateArtifacts } from "./generate-artifacts.js";
 import { generateCodexConfig } from "./generate-codex-config.js";
 import { generateExternalSkillFiles, generateSkillsLockFile } from "./generate-external-skills.js";
+import { generateInstallStateFile } from "./install-state.js";
 import { generateInternalSkills } from "./generate-internal-skills.js";
 import { generatePerformanceFiles } from "./generate-performance-files.js";
 import { generateVerifyScriptFiles } from "./generate-verify-script.js";
@@ -20,7 +21,8 @@ async function buildTargetFiles(context: GenerationContext): Promise<GeneratedFi
     ...generateInternalSkills(),
     ...generateVerifyScriptFiles(),
     ...generateArtifacts(),
-    ...externalSkills.files
+    ...externalSkills.files,
+    generateInstallStateFile(context)
   ];
 
   if (skillsLockFile) {

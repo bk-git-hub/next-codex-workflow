@@ -121,6 +121,10 @@ describe("workflow file generation", () => {
       path.join(rootDir, "agent-workflow", "manifest", "managed-files.json"),
       "utf8"
     );
+    const installState = await readFile(
+      path.join(rootDir, "agent-workflow", "manifest", "install-state.json"),
+      "utf8"
+    );
     const skillsLock = await readFile(
       path.join(rootDir, "agent-workflow", "manifest", "skills-lock.json"),
       "utf8"
@@ -217,6 +221,8 @@ describe("workflow file generation", () => {
     expect(verifyScript).toContain("CHECK_ORDER");
     expect(planArtifact).toContain("# Task Summary");
     expect(managedRegistry).toContain("\"paths\"");
+    expect(installState).toContain("\"externalSkillSet\": \"recommended\"");
+    expect(installState).toContain("\"performance\": false");
     expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillsLock).toContain("\"vitest\"");
     expect(skillsLock).toContain("\"playwright-best-practices\"");

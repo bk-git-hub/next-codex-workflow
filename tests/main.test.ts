@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "../src/cli/main.js";
+import packageJson from "../package.json";
 
 const createdDirectories: string[] = [];
 
@@ -27,6 +28,17 @@ describe("runCli", () => {
 
     expect(exitCode).toBe(0);
     expect(stdout).toHaveBeenCalledOnce();
+    expect(stderr).not.toHaveBeenCalled();
+  });
+
+  it("prints the current package version", async () => {
+    const stdout = vi.fn();
+    const stderr = vi.fn();
+
+    const exitCode = await runCli(["--version"], { stdout, stderr });
+
+    expect(exitCode).toBe(0);
+    expect(stdout).toHaveBeenCalledWith(packageJson.version);
     expect(stderr).not.toHaveBeenCalled();
   });
 

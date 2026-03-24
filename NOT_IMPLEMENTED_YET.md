@@ -11,7 +11,6 @@ bundled skills, and creates verification and optional performance files.
 
 ## Intentionally Deferred From `v0.1`
 
-- `update` command to refresh an existing installation with migration logic
 - `uninstall` command to remove generated workflow files safely
 - worktree orchestration or multi-writer execution
 - PR bot or hosted review automation behavior

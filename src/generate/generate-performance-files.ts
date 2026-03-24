@@ -9,7 +9,7 @@ import { formatScriptCommand } from "./format-script-command.js";
 import { renderTemplate } from "./render-template.js";
 import type { GenerationContext, GeneratedFile } from "./types.js";
 
-function resolveRoutes(context: GenerationContext): string[] {
+export function resolvePerformanceRoutes(context: GenerationContext): string[] {
   if (context.options.routes.length > 0) {
     return context.options.routes;
   }
@@ -22,7 +22,7 @@ function resolveRoutes(context: GenerationContext): string[] {
 }
 
 export function generatePerformanceFiles(context: GenerationContext): GeneratedFile[] {
-  const routes = resolveRoutes(context);
+  const routes = resolvePerformanceRoutes(context);
   const routesLiteral = JSON.stringify(routes, null, 2);
   const packageManager = context.inspection.packageManager.packageManager;
   const buildCommand = context.inspection.scripts.build
