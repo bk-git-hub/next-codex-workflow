@@ -5,12 +5,14 @@ import { inspectRepository, type RepositoryInspection } from "../../detect/inspe
 import { writeTargetTree } from "../../generate/write-target-tree.js";
 
 export type ExternalSkillSet = "minimal" | "recommended" | "full";
+export type WorkflowMode = "single-agent" | "multi-agent";
 
 export interface InitOptions {
   yes: boolean;
   performance: boolean;
   routes: string[];
   externalSkillSet: ExternalSkillSet;
+  workflowMode: WorkflowMode;
   overwriteManaged: boolean;
   dryRun: boolean;
   help: boolean;
@@ -33,12 +35,14 @@ type ParseResult =
   | { ok: false; error: string };
 
 const validSkillSets = new Set<ExternalSkillSet>(["minimal", "recommended", "full"]);
+const validWorkflowModes = new Set<WorkflowMode>(["single-agent", "multi-agent"]);
 
 const defaultInitOptions: InitOptions = {
   yes: false,
   performance: false,
   routes: [],
   externalSkillSet: "recommended",
+  workflowMode: "multi-agent",
   overwriteManaged: false,
   dryRun: false,
   help: false
@@ -97,6 +101,20 @@ export function parseInitArgs(args: string[]): ParseResult {
           }
 
           options.externalSkillSet = rawValue as ExternalSkillSet;
+          index += 1;
+          break;
+        }
+        case "--workflow-mode": {
+          const rawValue = nextValue(args, index, arg);
+
+          if (!validWorkflowModes.has(rawValue as WorkflowMode)) {
+            return {
+              ok: false,
+              error: `Invalid value for --workflow-mode: ${rawValue}. Expected single-agent or multi-agent.`
+            };
+          }
+
+          options.workflowMode = rawValue as WorkflowMode;
           index += 1;
           break;
         }
@@ -197,6 +215,7 @@ export async function runInitCommand(
 
   const codexMultiAgentStatus = await detectCodexMultiAgent(context.homeDir);
   const notes = [
+    `Workflow mode: ${options.workflowMode}.`,
     `Detected package manager: ${inspectionResult.inspection.packageManager.packageManager ?? "unknown"}.`,
     `Detected router style: ${formatRouterStyle(inspectionResult.inspection)}.`,
     `Detected scripts: ${formatDetectedScripts(inspectionResult.inspection)}.`,
@@ -216,7 +235,7 @@ export async function runInitCommand(
     );
   }
 
-  if (codexMultiAgentStatus.enabled) {
+  if (options.workflowMode === "multi-agent" && codexMultiAgentStatus.enabled) {
     notes.push(`Detected Codex multi-agent: enabled in ${codexMultiAgentStatus.configPath}.`);
   }
 
@@ -224,7 +243,7 @@ export async function runInitCommand(
 
   const warnings = [...inspectionResult.warnings];
 
-  if (!codexMultiAgentStatus.enabled) {
+  if (options.workflowMode === "multi-agent" && !codexMultiAgentStatus.enabled) {
     warnings.push(
       `Codex multi-agent is not enabled in ${codexMultiAgentStatus.configPath}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
     );
@@ -262,6 +281,7 @@ export function formatInitSummary(result: InitResult): string {
     `External skill set: ${result.options.externalSkillSet}`,
     `Performance enabled: ${result.options.performance ? "yes" : "no"}`,
     `Routes: ${result.options.routes.length > 0 ? result.options.routes.join(", ") : "(none)"}`,
+    `Workflow mode: ${result.options.workflowMode}`,
     `Overwrite managed: ${result.options.overwriteManaged ? "yes" : "no"}`,
     `Auto-confirm: ${result.options.yes ? "yes" : "no"}`
   ];

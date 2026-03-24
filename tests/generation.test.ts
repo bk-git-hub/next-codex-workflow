@@ -99,6 +99,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -228,6 +229,7 @@ describe("workflow file generation", () => {
     expect(managedRegistry).toContain("\"paths\"");
     expect(installState).toContain("\"externalSkillSet\": \"recommended\"");
     expect(installState).toContain("\"performance\": false");
+    expect(installState).toContain("\"workflowMode\": \"multi-agent\"");
     expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillsLock).toContain("\"vitest\"");
     expect(skillsLock).toContain("\"playwright-best-practices\"");
@@ -264,6 +266,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -287,6 +290,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -309,6 +313,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: true,
         dryRun: false,
         help: false
@@ -333,6 +338,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -350,6 +356,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -373,6 +380,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -393,6 +401,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -411,6 +420,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: true,
         dryRun: false,
         help: false
@@ -434,6 +444,7 @@ describe("workflow file generation", () => {
         performance: true,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -499,6 +510,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -542,6 +554,7 @@ describe("workflow file generation", () => {
         performance: false,
         routes: [],
         externalSkillSet: "minimal",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -573,6 +586,7 @@ describe("workflow file generation", () => {
         performance: true,
         routes: [],
         externalSkillSet: "full",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -588,5 +602,57 @@ describe("workflow file generation", () => {
     );
 
     expect(optionalSkill).toContain("name: next-cache-components");
+  });
+
+  it("generates single-agent shortcut behavior when requested", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "single-agent",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(result.exitCode).toBe(0);
+
+    const agentsMd = await readFile(path.join(rootDir, "AGENTS.md"), "utf8");
+    const installState = await readFile(
+      path.join(rootDir, "agent-workflow", "manifest", "install-state.json"),
+      "utf8"
+    );
+    const planFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"),
+      "utf8"
+    );
+    const buildFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "build-feature", "SKILL.md"),
+      "utf8"
+    );
+    const verifyFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "verify-feature", "SKILL.md"),
+      "utf8"
+    );
+    const reviewFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "review-feature", "SKILL.md"),
+      "utf8"
+    );
+
+    expect(agentsMd).toContain("Current workflow mode: single-agent");
+    expect(installState).toContain('"workflowMode": "single-agent"');
+    expect(planFeatureSkill).toContain("This repository uses the single-agent workflow mode.");
+    expect(planFeatureSkill).not.toContain("This skill requires Codex multi-agent.");
+    expect(buildFeatureSkill).toContain("Implement the approved plan directly in the current session.");
+    expect(buildFeatureSkill).not.toContain("Spawn the agent named `executor`");
+    expect(verifyFeatureSkill).toContain("Run the repository verification workflow in the current session.");
+    expect(reviewFeatureSkill).toContain("Perform the final review in the current session.");
   });
 });

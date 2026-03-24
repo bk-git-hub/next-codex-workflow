@@ -89,6 +89,7 @@ describe("runUpdateCommand", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -129,6 +130,7 @@ describe("runUpdateCommand", () => {
         performance: true,
         routes: ["/", "/dashboard"],
         externalSkillSet: "full",
+        workflowMode: "single-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -152,6 +154,7 @@ describe("runUpdateCommand", () => {
     expect(updateResult.exitCode).toBe(0);
     expect(updateResult.options.performance).toBe(true);
     expect(updateResult.options.externalSkillSet).toBe("full");
+    expect(updateResult.options.workflowMode).toBe("single-agent");
     expect(updateResult.options.routes).toEqual(["/", "/dashboard"]);
     expect(updateResult.warnings).toContain(
       "No install-state manifest was found. Update inferred the existing workflow options from the generated files in this repository."
@@ -163,6 +166,7 @@ describe("runUpdateCommand", () => {
     );
     expect(installState).toContain('"externalSkillSet": "full"');
     expect(installState).toContain('"performance": true');
+    expect(installState).toContain('"workflowMode": "single-agent"');
   });
 
   it("fails when no existing workflow installation is present", async () => {

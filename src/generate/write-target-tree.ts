@@ -18,7 +18,7 @@ async function buildTargetFiles(context: GenerationContext): Promise<GeneratedFi
     generateAgentsMd(context),
     generateCodexConfig(),
     ...generateAgentFiles(),
-    ...generateInternalSkills(),
+    ...generateInternalSkills(context),
     ...generateVerifyScriptFiles(),
     ...generateArtifacts(),
     ...externalSkills.files,

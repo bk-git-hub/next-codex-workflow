@@ -1,7 +1,7 @@
 interface:
   display_name: "Verify Feature"
   short_description: "Run checks and update VERIFY.md"
-  default_prompt: "Use $verify-feature to spawn the agent named verifier, wait for it to run the repository verification workflow, and stop with instructions to run /multi-agent and restart Codex if spawning is unavailable."
+  default_prompt: "{{verifyFeatureDefaultPrompt}}"
 
 policy:
   allow_implicit_invocation: false

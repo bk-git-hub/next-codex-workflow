@@ -64,6 +64,7 @@ export async function runUpdateCommand(
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: true,
         dryRun: options.dryRun,
         help: false
@@ -83,6 +84,7 @@ export async function runUpdateCommand(
     performance: installState.options.performance,
     routes: installState.options.routes,
     externalSkillSet: installState.options.externalSkillSet,
+    workflowMode: installState.options.workflowMode,
     overwriteManaged: true,
     dryRun: options.dryRun,
     help: false

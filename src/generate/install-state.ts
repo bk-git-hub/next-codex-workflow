@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 
 import approvedExternalSkills from "../../manifest/approved-external-skills.json";
-import type { ExternalSkillSet, InitOptions } from "../cli/commands/init.js";
+import type { ExternalSkillSet, InitOptions, WorkflowMode } from "../cli/commands/init.js";
 import { PACKAGE_VERSION } from "../package-version.js";
 import { pathExists, resolveFrom } from "../utils/fs.js";
 import { resolvePerformanceRoutes } from "./generate-performance-files.js";
@@ -15,6 +15,7 @@ export interface SavedInstallOptions {
   performance: boolean;
   routes: string[];
   externalSkillSet: ExternalSkillSet;
+  workflowMode: WorkflowMode;
 }
 
 interface InstallState {
@@ -48,6 +49,10 @@ function isExternalSkillSet(value: unknown): value is ExternalSkillSet {
   return value === "minimal" || value === "recommended" || value === "full";
 }
 
+function isWorkflowMode(value: unknown): value is WorkflowMode {
+  return value === "single-agent" || value === "multi-agent";
+}
+
 function isSavedInstallOptions(value: unknown): value is SavedInstallOptions {
   if (!value || typeof value !== "object") {
     return false;
@@ -59,7 +64,8 @@ function isSavedInstallOptions(value: unknown): value is SavedInstallOptions {
     typeof maybeOptions.performance === "boolean" &&
     Array.isArray(maybeOptions.routes) &&
     maybeOptions.routes.every((route) => typeof route === "string") &&
-    isExternalSkillSet(maybeOptions.externalSkillSet)
+    isExternalSkillSet(maybeOptions.externalSkillSet) &&
+    isWorkflowMode(maybeOptions.workflowMode)
   );
 }
 
@@ -72,7 +78,8 @@ function serializeInstallState(options: SavedInstallOptions): string {
       options: {
         performance: options.performance,
         routes: normalizeRoutes(options.routes),
-        externalSkillSet: options.externalSkillSet
+        externalSkillSet: options.externalSkillSet,
+        workflowMode: options.workflowMode
       }
     },
     null,
@@ -90,7 +97,8 @@ export function generateInstallStateFile(
     content: `${serializeInstallState({
       performance: context.options.performance,
       routes,
-      externalSkillSet: context.options.externalSkillSet
+      externalSkillSet: context.options.externalSkillSet,
+      workflowMode: context.options.workflowMode
     })}\n`
   };
 }
@@ -114,7 +122,8 @@ export async function loadInstallState(rootDir: string): Promise<ResolvedInstall
       options: {
         performance: parsed.options.performance,
         routes: normalizeRoutes(parsed.options.routes),
-        externalSkillSet: parsed.options.externalSkillSet
+        externalSkillSet: parsed.options.externalSkillSet,
+        workflowMode: parsed.options.workflowMode
       },
       source: "manifest",
       warnings: []
@@ -254,6 +263,51 @@ async function inferPerformanceRoutes(rootDir: string): Promise<{ routes: string
   }
 }
 
+async function inferWorkflowMode(rootDir: string): Promise<{ workflowMode: WorkflowMode; warnings: string[] }> {
+  const planFeaturePath = resolveFrom(rootDir, ".agents", "skills", "plan-feature", "SKILL.md");
+
+  if (!(await pathExists(planFeaturePath))) {
+    return {
+      workflowMode: "multi-agent",
+      warnings: [
+        "Could not infer the workflow mode because .agents/skills/plan-feature/SKILL.md is missing. Update will default to multi-agent."
+      ]
+    };
+  }
+
+  try {
+    const raw = await readFile(planFeaturePath, "utf8");
+
+    if (raw.includes("This repository uses the single-agent workflow mode.")) {
+      return {
+        workflowMode: "single-agent",
+        warnings: []
+      };
+    }
+
+    if (raw.includes("This skill requires Codex multi-agent.")) {
+      return {
+        workflowMode: "multi-agent",
+        warnings: []
+      };
+    }
+  } catch {
+    return {
+      workflowMode: "multi-agent",
+      warnings: [
+        "Could not read .agents/skills/plan-feature/SKILL.md. Update will default to multi-agent."
+      ]
+    };
+  }
+
+  return {
+    workflowMode: "multi-agent",
+    warnings: [
+      "Could not infer the workflow mode from the generated plan-feature skill. Update will default to multi-agent."
+    ]
+  };
+}
+
 export async function resolveInstallState(rootDir: string): Promise<ResolvedInstallState | null> {
   const manifestState = await loadInstallState(rootDir);
 
@@ -272,18 +326,21 @@ export async function resolveInstallState(rootDir: string): Promise<ResolvedInst
   const performance = await inferPerformanceEnabled(rootDir);
   const routeInference = performance ? await inferPerformanceRoutes(rootDir) : { routes: [], warnings: [] };
   const skillSetInference = await inferExternalSkillSet(rootDir);
+  const workflowModeInference = await inferWorkflowMode(rootDir);
 
   return {
     options: {
       performance,
       routes: routeInference.routes,
-      externalSkillSet: skillSetInference.externalSkillSet
+      externalSkillSet: skillSetInference.externalSkillSet,
+      workflowMode: workflowModeInference.workflowMode
     },
     source: "inferred",
     warnings: [
       "No install-state manifest was found. Update inferred the existing workflow options from the generated files in this repository.",
       ...routeInference.warnings,
-      ...skillSetInference.warnings
+      ...skillSetInference.warnings,
+      ...workflowModeInference.warnings
     ]
   };
 }

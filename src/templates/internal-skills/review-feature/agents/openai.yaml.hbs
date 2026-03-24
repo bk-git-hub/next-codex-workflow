@@ -1,7 +1,7 @@
 interface:
   display_name: "Review Feature"
   short_description: "Review changes and update REVIEW.md"
-  default_prompt: "Use $review-feature to spawn the agent named reviewer, wait for it to complete the final review, and stop with instructions to run /multi-agent and restart Codex if spawning is unavailable."
+  default_prompt: "{{reviewFeatureDefaultPrompt}}"
 
 policy:
   allow_implicit_invocation: false

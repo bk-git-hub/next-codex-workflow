@@ -1,7 +1,7 @@
 interface:
   display_name: "Plan Feature"
   short_description: "Draft PLAN.md and FILE_SPECS.md"
-  default_prompt: "Use $plan-feature to inspect this repository, spawn the agent named explorer first for read-only repository analysis, then spawn the agent named planner to create PLAN.md and FILE_SPECS.md from that exploration brief, and stop with instructions to run /multi-agent and restart Codex if spawning is unavailable: "
+  default_prompt: "{{planFeatureDefaultPrompt}}: "
 
 policy:
   allow_implicit_invocation: false

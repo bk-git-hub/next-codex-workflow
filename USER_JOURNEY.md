@@ -104,6 +104,12 @@ Example with more features:
 npx next-codex-workflow init --performance --external-skill-set full
 ```
 
+Example with the single-agent workflow mode:
+
+```bash
+npx next-codex-workflow init --workflow-mode single-agent
+```
+
 What happens during `init`:
 
 - the repo is validated as a supported Next.js project
@@ -112,6 +118,8 @@ What happens during `init`:
 - `.codex/config.toml` and custom agent files are created
 - repo-local skills are created in `.agents/skills/`
 - bundled external skills are copied into `.agents/skills/`
+- the selected workflow mode is written into the generated repo rules and
+  shortcut skills
 - workflow artifact files are created in `agent-workflow/artifacts/`
 - verification script is created
 - optional performance workflow files are created when `--performance` is used
@@ -139,6 +147,11 @@ After `init`, the target repository includes:
 - `scripts/run-lighthouse.mjs` when performance mode is enabled
 
 Think of this as adding a reusable Codex operating system to the repo.
+
+The repository can be installed in either:
+
+- `multi-agent` mode for orchestrator plus specialist-agent workflows
+- `single-agent` mode for same-artifact workflows that stay in one session
 
 ## Step 5: Use The Short Workflow Commands
 

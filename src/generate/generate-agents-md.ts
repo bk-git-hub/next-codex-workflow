@@ -46,8 +46,10 @@ export function generateAgentsMd(context: GenerationContext): GeneratedFile {
   }
 
   const performanceRule = context.options.performance
-    ? "7. If performance mode is enabled and user-facing routes changed, run performance audit and update `PERF.md`.\n8. Final summaries must reference workflow artifact outputs."
-    : "7. Final summaries must reference workflow artifact outputs.";
+    ? "9. If performance mode is enabled and user-facing routes changed, run performance audit and update `PERF.md`.\n10. Final summaries must reference workflow artifact outputs."
+    : "9. Final summaries must reference workflow artifact outputs.";
+
+  const isMultiAgent = context.options.workflowMode === "multi-agent";
 
   return {
     relativePath: "AGENTS.md",
@@ -56,7 +58,26 @@ export function generateAgentsMd(context: GenerationContext): GeneratedFile {
       sourceRoots: formatSourceRoots(context),
       commands: formatCommands(context),
       workflowArtifacts: workflowArtifacts.join("\n"),
-      performanceRule
+      performanceRule,
+      workflowModeLabel: isMultiAgent ? "multi-agent" : "single-agent",
+      planShortcutDescription: isMultiAgent
+        ? "route work through `explorer` then `planner` before coding."
+        : "inspect the repo, explore the current codebase, and write `PLAN.md` plus `FILE_SPECS.md` in the current session before coding.",
+      buildShortcutDescription: isMultiAgent
+        ? "route approved implementation or refactor work through `executor`, `tester`, then verification and review."
+        : "implement the approved plan, update tests, and complete verification plus review in the current session.",
+      verifyShortcutDescription: isMultiAgent
+        ? "run verification through `verifier` and update `VERIFY.md`."
+        : "run verification in the current session and update `VERIFY.md`.",
+      reviewShortcutDescription: isMultiAgent
+        ? "run final review through `reviewer` and update `REVIEW.md`."
+        : "run final review in the current session and update `REVIEW.md`.",
+      planningRoutingRule: isMultiAgent
+        ? "Route non-trivial planning through `$plan-feature` so `explorer` surfaces the current repo patterns before `planner` writes the artifacts."
+        : "Route non-trivial planning through `$plan-feature` so the current session performs exploration before writing the artifacts.",
+      implementationRoutingRule: isMultiAgent
+        ? "Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `tester`, `verifier`, `reviewer`, and the repo-local quality skills are all used."
+        : "Route non-trivial implementation or refactor work through `$build-feature` so the current session still follows the full plan, testing, verification, review, and quality-skill workflow."
     })
   };
 }

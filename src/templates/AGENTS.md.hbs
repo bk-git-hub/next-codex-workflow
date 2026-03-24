@@ -8,16 +8,18 @@ Important source roots:
 
 Workflow artifacts live in `agent-workflow/artifacts/`.
 
+Current workflow mode: {{workflowModeLabel}}
+
 # Commands
 
 {{commands}}
 
 # Workflow Shortcuts
 
-- `$plan-feature` to route work through `explorer` then `planner` before coding.
-- `$build-feature` to route approved implementation or refactor work through `executor`, `tester`, then verification and review.
-- `$verify-feature` to run verification and update `VERIFY.md`.
-- `$review-feature` to run final review and update `REVIEW.md`.
+- `$plan-feature` to {{planShortcutDescription}}
+- `$build-feature` to {{buildShortcutDescription}}
+- `$verify-feature` to {{verifyShortcutDescription}}
+- `$review-feature` to {{reviewShortcutDescription}}
 
 # Workflow Artifacts
 
@@ -29,8 +31,8 @@ Workflow artifacts live in `agent-workflow/artifacts/`.
 2. Use the planning workflow before introducing new routes, server/client boundaries, state ownership changes, or major UI composition changes.
 3. If more than one viable strategy exists, ask the user to choose.
 4. After a user decision, update `DECISION.md`.
-5. Route non-trivial planning through `$plan-feature` so `explorer` surfaces the current repo patterns before `planner` writes the artifacts.
-6. Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `tester`, `verifier`, `reviewer`, and the repo-local quality skills are all used.
+5. {{planningRoutingRule}}
+6. {{implementationRoutingRule}}
 7. After implementation, run verification and update `VERIFY.md`.
 8. After verification, run structured review and update `REVIEW.md`.
 {{performanceRule}}

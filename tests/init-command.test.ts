@@ -33,6 +33,8 @@ describe("parseInitArgs", () => {
       "/,/dashboard",
       "--external-skill-set",
       "full",
+      "--workflow-mode",
+      "single-agent",
       "--overwrite-managed",
       "--dry-run"
     ]);
@@ -48,6 +50,7 @@ describe("parseInitArgs", () => {
       performance: true,
       routes: ["/", "/dashboard"],
       externalSkillSet: "full",
+      workflowMode: "single-agent",
       overwriteManaged: true,
       dryRun: true,
       help: false
@@ -60,6 +63,15 @@ describe("parseInitArgs", () => {
     expect(result).toEqual({
       ok: false,
       error: "Invalid value for --external-skill-set: custom. Expected minimal, recommended, or full."
+    });
+  });
+
+  it("rejects an invalid workflow mode", () => {
+    const result = parseInitArgs(["--workflow-mode", "parallel"]);
+
+    expect(result).toEqual({
+      ok: false,
+      error: "Invalid value for --workflow-mode: parallel. Expected single-agent or multi-agent."
     });
   });
 
@@ -104,6 +116,7 @@ describe("runInitCommand", () => {
       performance: true,
       routes: ["/"],
       externalSkillSet: "recommended",
+      workflowMode: "multi-agent",
       overwriteManaged: false,
       dryRun: true,
       help: false
@@ -156,6 +169,7 @@ describe("runInitCommand", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -165,6 +179,52 @@ describe("runInitCommand", () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.notes).toContain(`Detected Codex multi-agent: enabled in ${path.join(homeDir, ".codex", "config.toml")}.`);
+    expect(result.warnings).not.toContain(
+      `Codex multi-agent is not enabled in ${path.join(homeDir, ".codex", "config.toml")}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
+    );
+  });
+
+  it("does not require Codex multi-agent when the workflow mode is single-agent", async () => {
+    const rootDir = await createTempRepository();
+    const homeDir = await createTempHomeDirectory();
+
+    await writeFile(
+      path.join(rootDir, "package.json"),
+      JSON.stringify(
+        {
+          dependencies: {
+            next: "^16.0.0"
+          },
+          scripts: {
+            dev: "next dev",
+            build: "next build",
+            lint: "eslint ."
+          }
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(path.join(rootDir, "package-lock.json"), "");
+    await mkdir(path.join(rootDir, "app"), { recursive: true });
+    await writeFile(path.join(rootDir, "app", "page.tsx"), "export default function Page() { return null; }");
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "single-agent",
+        overwriteManaged: false,
+        dryRun: true,
+        help: false
+      },
+      { cwd: rootDir, homeDir }
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.notes).toContain("Workflow mode: single-agent.");
     expect(result.warnings).not.toContain(
       `Codex multi-agent is not enabled in ${path.join(homeDir, ".codex", "config.toml")}. Run /multi-agent in Codex CLI and start a new session before relying on the generated workflow shortcuts.`
     );
@@ -181,6 +241,7 @@ describe("runInitCommand", () => {
         performance: false,
         routes: [],
         externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
         overwriteManaged: false,
         dryRun: false,
         help: false
