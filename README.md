@@ -94,13 +94,14 @@ In practice, the main Codex session acts as the orchestrator:
 
 The generated custom agents support that workflow:
 
+- `explorer` for read-only repository inspection before planning
 - `planner` for planning artifacts
 - `executor` for implementation and refactor work
 - `tester` for test strategy, test updates, and test-focused checks
 - `verifier` for deterministic checks
 - `reviewer` for final review
 
-All five agents are expected to consult the relevant vendored quality skills in
+All six agents are expected to consult the relevant vendored quality skills in
 `.agents/skills/`. Planning and execution especially use those skills to shape
 architecture, file boundaries, implementation details, UI quality, and test
 impact. The tester agent uses bundled `vitest`, `playwright-best-practices`,
@@ -196,6 +197,7 @@ default because this repository is the installer itself.
 
 - `AGENTS.md`
 - `.codex/config.toml`
+- `.codex/agents/explorer.toml`
 - `.codex/agents/planner.toml`
 - `.codex/agents/executor.toml`
 - `.codex/agents/tester.toml`

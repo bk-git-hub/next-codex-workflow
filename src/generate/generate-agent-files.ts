@@ -1,3 +1,4 @@
+import explorerTemplate from "../templates/codex/agents/explorer.toml.hbs";
 import executorTemplate from "../templates/codex/agents/executor.toml.hbs";
 import plannerTemplate from "../templates/codex/agents/planner.toml.hbs";
 import reviewerTemplate from "../templates/codex/agents/reviewer.toml.hbs";
@@ -8,6 +9,10 @@ import type { GeneratedFile } from "./types.js";
 
 export function generateAgentFiles(): GeneratedFile[] {
   return [
+    {
+      relativePath: ".codex/agents/explorer.toml",
+      content: renderTemplate(explorerTemplate, {})
+    },
     {
       relativePath: ".codex/agents/planner.toml",
       content: renderTemplate(plannerTemplate, {})

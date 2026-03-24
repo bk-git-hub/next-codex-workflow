@@ -13,17 +13,20 @@ Create planning artifacts for a feature without implementing application code.
 1. Read the feature request and inspect the relevant repository areas.
 2. If the request is ambiguous, clarify assumptions, constraints, and acceptance criteria before planning.
 3. This skill requires Codex multi-agent. If multi-agent is unavailable, stop and tell the user to run `/multi-agent` and start a new Codex session before retrying.
-4. Spawn the agent named `planner` now and delegate the planning task.
-5. Wait for the spawned `planner` agent to finish.
-6. Have the `planner` agent create or update:
+4. Spawn the agent named `explorer` now and delegate read-only repository exploration.
+5. Wait for the spawned `explorer` agent to finish.
+6. Spawn the agent named `planner` now and delegate the planning task together with the `explorer` findings.
+7. Wait for the spawned `planner` agent to finish.
+8. Have the `planner` agent create or update:
    - `agent-workflow/artifacts/PLAN.md`
    - `agent-workflow/artifacts/FILE_SPECS.md`
-7. Surface open decisions that need explicit user choice.
-8. Stop before implementation code.
+9. Surface open decisions that need explicit user choice.
+10. Stop before implementation code.
 
 # Guardrails
 
 - Do not edit application source files.
+- Do not let the `explorer` agent write repository files; it is read-only.
 - Do not create or update the planning artifacts in the parent session when the `planner` agent cannot be spawned; stop instead.
 - Do not skip `FILE_SPECS.md` for non-trivial work.
 - Keep the plan concrete enough that implementation can follow it with minimal re-discovery.

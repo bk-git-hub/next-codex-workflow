@@ -11,10 +11,11 @@ It prepares the repository so Codex can work in a repeatable feature workflow:
 
 1. clarify the task when needed
 2. plan the change
-3. delegate implementation or refactor work to the execution agent
-4. delegate test impact and test updates to the testing agent
-5. verify the result
-6. review the result
+3. explore the existing codebase before planning
+4. delegate implementation or refactor work to the execution agent
+5. delegate test impact and test updates to the testing agent
+6. verify the result
+7. review the result
 
 ## Who It Is For
 
@@ -121,6 +122,7 @@ After `init`, the target repository includes:
 
 - `AGENTS.md`
 - `.codex/config.toml`
+- `.codex/agents/explorer.toml`
 - `.codex/agents/planner.toml`
 - `.codex/agents/executor.toml`
 - `.codex/agents/tester.toml`
@@ -156,7 +158,9 @@ $plan-feature add saved search filters to the dashboard
 
 What Codex should do:
 
-- inspect the relevant code
+- spawn `explorer`
+- have `explorer` inspect the relevant code and summarize repo patterns
+- spawn `planner`
 - clarify ambiguity if needed
 - create or update `PLAN.md`
 - create or update `FILE_SPECS.md`
@@ -235,7 +239,7 @@ Subagents are most useful during implementation, not during every single task.
 
 Typical pattern:
 
-1. `$plan-feature` creates the plan
+1. `$plan-feature` spawns `explorer` and then creates the plan
 2. user approves the plan
 3. `$build-feature` implements the plan
 4. during implementation Codex may use subagents to:
@@ -248,13 +252,14 @@ Typical pattern:
 
 In the generated setup:
 
+- `explorer` is the repository inspection specialist
 - `planner` is the planning specialist
 - `executor` is the implementation and refactor specialist
 - `tester` is the testing strategy and test authoring specialist
 - `verifier` is the deterministic checks specialist
 - `reviewer` is the final review specialist
 
-All four are custom agents generated into `.codex/agents/`. The shortcut
+All six are custom agents generated into `.codex/agents/`. The shortcut
 skills are the easy user-facing entrypoints that tell Codex when to use them.
 
 ## Step 7: Know When To Use The Structured Flow
