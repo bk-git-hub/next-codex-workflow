@@ -264,46 +264,53 @@ async function inferPerformanceRoutes(rootDir: string): Promise<{ routes: string
 }
 
 async function inferWorkflowMode(rootDir: string): Promise<{ workflowMode: WorkflowMode; warnings: string[] }> {
+  const agentsPath = resolveFrom(rootDir, "AGENTS.md");
   const planFeaturePath = resolveFrom(rootDir, ".agents", "skills", "plan-feature", "SKILL.md");
+  const warnings: string[] = [];
 
-  if (!(await pathExists(planFeaturePath))) {
-    return {
-      workflowMode: "multi-agent",
-      warnings: [
-        "Could not infer the workflow mode because .agents/skills/plan-feature/SKILL.md is missing. Update will default to multi-agent."
-      ]
-    };
+  if (await pathExists(agentsPath)) {
+    try {
+      const agentsMd = await readFile(agentsPath, "utf8");
+      const markerMatch = agentsMd.match(/^Current workflow mode:\s+(single-agent|multi-agent)\s*$/m);
+
+      if (markerMatch) {
+        return {
+          workflowMode: markerMatch[1] as WorkflowMode,
+          warnings: []
+        };
+      }
+    } catch {
+      warnings.push("Could not read AGENTS.md. Update will fall back to other workflow mode signals.");
+    }
   }
 
-  try {
-    const raw = await readFile(planFeaturePath, "utf8");
+  if (await pathExists(planFeaturePath)) {
+    try {
+      const raw = await readFile(planFeaturePath, "utf8");
 
-    if (raw.includes("This repository uses the single-agent workflow mode.")) {
-      return {
-        workflowMode: "single-agent",
-        warnings: []
-      };
-    }
+      if (raw.includes("This repository uses the single-agent workflow mode.")) {
+        return {
+          workflowMode: "single-agent",
+          warnings: []
+        };
+      }
 
-    if (raw.includes("This skill requires Codex multi-agent.")) {
-      return {
-        workflowMode: "multi-agent",
-        warnings: []
-      };
+      if (raw.includes("This skill requires Codex multi-agent.")) {
+        return {
+          workflowMode: "multi-agent",
+          warnings: []
+        };
+      }
+    } catch {
+      warnings.push("Could not read .agents/skills/plan-feature/SKILL.md. Update will default to multi-agent.");
     }
-  } catch {
-    return {
-      workflowMode: "multi-agent",
-      warnings: [
-        "Could not read .agents/skills/plan-feature/SKILL.md. Update will default to multi-agent."
-      ]
-    };
   }
 
   return {
     workflowMode: "multi-agent",
     warnings: [
-      "Could not infer the workflow mode from the generated plan-feature skill. Update will default to multi-agent."
+      ...warnings,
+      "Could not infer the workflow mode from AGENTS.md or the generated plan-feature skill. Update will default to multi-agent."
     ]
   };
 }

@@ -170,12 +170,13 @@ function formatDetectedScripts(inspection: RepositoryInspection): string {
 
 export async function runInitCommand(
   options: InitOptions,
-  context: { cwd?: string; homeDir?: string; prompter?: InitPrompter } = {}
+  context: { cwd?: string; homeDir?: string; prompter?: InitPrompter; interactive?: boolean } = {}
 ): Promise<InitResult> {
   const targetDirectory = context.cwd ?? process.cwd();
   let resolvedOptions = options;
+  const allowPrompt = context.interactive ?? true;
 
-  if (!options.yes && (context.prompter || (process.stdin.isTTY && process.stdout.isTTY))) {
+  if (allowPrompt && !options.yes && (context.prompter || (process.stdin.isTTY && process.stdout.isTTY))) {
     const promptResult = await (context.prompter ?? promptInitOptions)(options);
     resolvedOptions = {
       ...options,

@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promise
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runInitCommand } from "../src/cli/commands/init.js";
 import { formatUpdateSummary, parseUpdateArgs, runUpdateCommand } from "../src/cli/commands/update.js";
@@ -167,6 +167,85 @@ describe("runUpdateCommand", () => {
     expect(installState).toContain('"externalSkillSet": "full"');
     expect(installState).toContain('"performance": true');
     expect(installState).toContain('"workflowMode": "single-agent"');
+  });
+
+  it("infers the workflow mode from AGENTS.md when the plan shortcut file is unavailable", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const initResult = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "single-agent",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(initResult.exitCode).toBe(0);
+
+    await unlink(path.join(rootDir, "agent-workflow", "manifest", "install-state.json"));
+    await unlink(path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"));
+
+    const updateResult = await runUpdateCommand(
+      {
+        yes: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(updateResult.exitCode).toBe(0);
+    expect(updateResult.options.workflowMode).toBe("single-agent");
+  });
+
+  it("does not reopen the interactive installer during update", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const initResult = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(initResult.exitCode).toBe(0);
+
+    const prompter = vi.fn(async () => ({
+      workflowMode: "single-agent" as const,
+      externalSkillSet: "full" as const,
+      performance: true,
+      routes: ["/", "/dashboard"]
+    }));
+
+    const updateResult = await runUpdateCommand(
+      {
+        yes: false,
+        dryRun: true,
+        help: false
+      },
+      { cwd: rootDir, prompter }
+    );
+
+    expect(updateResult.exitCode).toBe(0);
+    expect(prompter).not.toHaveBeenCalled();
+    expect(updateResult.options.workflowMode).toBe("multi-agent");
+    expect(updateResult.options.externalSkillSet).toBe("recommended");
+    expect(updateResult.options.performance).toBe(false);
   });
 
   it("fails when no existing workflow installation is present", async () => {

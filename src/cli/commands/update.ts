@@ -2,6 +2,7 @@ import process from "node:process";
 
 import type { InitResult } from "./init.js";
 import { formatInitSummary, runInitCommand, type InitOptions } from "./init.js";
+import type { InitPrompter } from "./prompt-init-options.js";
 import { resolveInstallState } from "../../generate/install-state.js";
 
 export interface UpdateOptions {
@@ -50,7 +51,7 @@ export function parseUpdateArgs(args: string[]): ParseResult {
 
 export async function runUpdateCommand(
   options: UpdateOptions,
-  context: { cwd?: string; homeDir?: string } = {}
+  context: { cwd?: string; homeDir?: string; prompter?: InitPrompter } = {}
 ): Promise<InitResult> {
   const targetDirectory = context.cwd ?? process.cwd();
   const installState = await resolveInstallState(targetDirectory);
@@ -90,7 +91,10 @@ export async function runUpdateCommand(
     help: false
   };
 
-  const result = await runInitCommand(initOptions, context);
+  const result = await runInitCommand(initOptions, {
+    ...context,
+    interactive: false
+  });
   const sourceNote =
     installState.source === "manifest"
       ? "Loaded saved workflow options from agent-workflow/manifest/install-state.json."
