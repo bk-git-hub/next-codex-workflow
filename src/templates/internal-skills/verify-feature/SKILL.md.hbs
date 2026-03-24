@@ -10,11 +10,14 @@ Run deterministic verification for the latest implementation work.
 
 # Workflow
 
-1. Use the `verifier` custom agent to run the repository verification workflow.
-2. Update `agent-workflow/artifacts/VERIFY.md`.
-3. Report blocking and non-blocking failures clearly.
+1. This skill requires Codex multi-agent. If multi-agent is unavailable, stop and tell the user to run `/multi-agent` and start a new Codex session before retrying.
+2. Spawn the agent named `verifier` now and delegate the repository verification workflow.
+3. Wait for the spawned `verifier` agent to finish.
+4. Have the `verifier` agent update `agent-workflow/artifacts/VERIFY.md`.
+5. Report blocking and non-blocking failures clearly.
 
 # Guardrails
 
 - Do not redesign implementation during verification.
+- Do not run verification in the parent session when the `verifier` agent cannot be spawned; stop instead.
 - Do not edit application source files unless the user explicitly asks for a fix pass after verification.

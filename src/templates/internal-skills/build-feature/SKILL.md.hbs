@@ -18,17 +18,21 @@ Implement an approved feature plan with focused subagent help.
 
 1. Read `PLAN.md`, `FILE_SPECS.md`, and `DECISION.md` if it exists.
 2. If planning artifacts are missing or too vague, stop and ask the user to run `$plan-feature` first.
-3. Implement the approved plan.
-4. Use subagents for independent exploration or isolated code changes when that materially speeds up the work.
-5. If multiple viable strategies appear during implementation, stop for user choice and append the decision to `DECISION.md`.
-6. For Next.js-specific implementation details, use `next-best-practices` when relevant.
-7. For React performance or rendering issues, use `vercel-react-best-practices` when relevant.
-8. For component system work, use `building-components` or `vercel-composition-patterns` when relevant.
-9. After implementation, use the `verifier` custom agent to update `agent-workflow/artifacts/VERIFY.md`.
-10. After verification, use the `reviewer` custom agent to update `agent-workflow/artifacts/REVIEW.md`.
+3. This skill requires Codex multi-agent. If multi-agent is unavailable, stop and tell the user to run `/multi-agent` and start a new Codex session before retrying.
+4. Before editing application code, spawn at least one focused subagent for repository exploration or an isolated implementation slice.
+5. When multiple subagents edit code, keep their ownership disjoint so integration stays straightforward.
+6. Wait for the required subagent results before integrating dependent changes in the parent session.
+7. Implement the approved plan.
+8. If multiple viable strategies appear during implementation, stop for user choice and append the decision to `DECISION.md`.
+9. For Next.js-specific implementation details, use `next-best-practices` when relevant.
+10. For React performance or rendering issues, use `vercel-react-best-practices` when relevant.
+11. For component system work, use `building-components` or `vercel-composition-patterns` when relevant.
+12. Spawn the agent named `verifier` and wait for it to update `agent-workflow/artifacts/VERIFY.md`.
+13. Spawn the agent named `reviewer` and wait for it to update `agent-workflow/artifacts/REVIEW.md`.
 
 # Guardrails
 
+- Do not fall back to a single-agent implementation when the required subagents cannot be spawned; stop instead.
 - Keep changes aligned with the approved plan unless the user approves a plan change.
 - Reference workflow artifacts in the final summary.
-- Keep verification and review as separate closeout steps, not hidden work.
+- Keep verification and review as separate spawned closeout steps, not hidden work.

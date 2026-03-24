@@ -10,11 +10,14 @@ Perform a structured final review for completed implementation work.
 
 # Workflow
 
-1. Use the `reviewer` custom agent to review the latest implementation.
-2. Update `agent-workflow/artifacts/REVIEW.md`.
-3. Prioritize correctness, regressions, plan compliance, and missing tests.
+1. This skill requires Codex multi-agent. If multi-agent is unavailable, stop and tell the user to run `/multi-agent` and start a new Codex session before retrying.
+2. Spawn the agent named `reviewer` now and delegate the final review.
+3. Wait for the spawned `reviewer` agent to finish.
+4. Have the `reviewer` agent update `agent-workflow/artifacts/REVIEW.md`.
+5. Prioritize correctness, regressions, plan compliance, and missing tests.
 
 # Guardrails
 
 - Do not edit application source files during review.
+- Do not perform the review in the parent session when the `reviewer` agent cannot be spawned; stop instead.
 - Keep findings concrete and prioritized.

@@ -97,6 +97,14 @@ describe("workflow file generation", () => {
       path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"),
       "utf8"
     );
+    const verifyFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "verify-feature", "SKILL.md"),
+      "utf8"
+    );
+    const reviewFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "review-feature", "SKILL.md"),
+      "utf8"
+    );
     const buildFeatureMetadata = await readFile(
       path.join(rootDir, ".agents", "skills", "build-feature", "agents", "openai.yaml"),
       "utf8"
@@ -133,8 +141,12 @@ describe("workflow file generation", () => {
     expect(managedRegistry).toContain("\"paths\"");
     expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillFile).toContain("name: task-clarification");
-    expect(planFeatureSkill).toContain("Use the `planner` custom agent");
-    expect(buildFeatureMetadata).toContain("$build-feature");
+    expect(planFeatureSkill).toContain("Spawn the agent named `planner` now");
+    expect(planFeatureSkill).toContain("run `/multi-agent`");
+    expect(verifyFeatureSkill).toContain("Spawn the agent named `verifier` now");
+    expect(reviewFeatureSkill).toContain("Spawn the agent named `reviewer` now");
+    expect(buildFeatureMetadata).toContain("spawn at least one focused subagent");
+    expect(buildFeatureMetadata).toContain("do not fall back to single-agent execution");
     expect(externalSkillFile).toContain("name: next-best-practices");
     expect(externalSkillReference).toContain("## Project Structure");
     expect(reactRule).toContain("Promise.all()");
