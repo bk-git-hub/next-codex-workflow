@@ -136,6 +136,9 @@ describe("workflow file generation", () => {
       path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"),
       "utf8"
     );
+    await expect(
+      readFile(path.join(rootDir, ".agents", "skills", "implementation-strategy", "agents", "openai.yaml"), "utf8")
+    ).rejects.toThrow();
     const verifyFeatureSkill = await readFile(
       path.join(rootDir, ".agents", "skills", "verify-feature", "SKILL.md"),
       "utf8"

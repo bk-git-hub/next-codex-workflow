@@ -6,7 +6,6 @@ import buildFeatureMetadataTemplate from "../templates/internal-skills/build-fea
 import decisionLogSkillTemplate from "../templates/internal-skills/decision-log/SKILL.md.hbs";
 import decisionTemplate from "../templates/internal-skills/decision-log/references/decision-template.md.hbs";
 import implementationStrategySkillTemplate from "../templates/internal-skills/implementation-strategy/SKILL.md.hbs";
-import implementationStrategyMetadataTemplate from "../templates/internal-skills/implementation-strategy/agents/openai.yaml.hbs";
 import fileSpecTemplate from "../templates/internal-skills/implementation-strategy/references/file-spec-template.md.hbs";
 import planTemplate from "../templates/internal-skills/implementation-strategy/references/plan-template.md.hbs";
 import planFeatureSkillTemplate from "../templates/internal-skills/plan-feature/SKILL.md.hbs";
@@ -51,10 +50,6 @@ export function generateInternalSkills(): GeneratedFile[] {
     {
       relativePath: ".agents/skills/implementation-strategy/references/file-spec-template.md",
       content: renderTemplate(fileSpecTemplate, {})
-    },
-    {
-      relativePath: ".agents/skills/implementation-strategy/agents/openai.yaml",
-      content: renderTemplate(implementationStrategyMetadataTemplate, {})
     },
     {
       relativePath: ".agents/skills/plan-feature/SKILL.md",
