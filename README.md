@@ -19,7 +19,8 @@ During `init`, it:
 - validates that the target repository is a supported Next.js project
 - detects router style, package manager, scripts, and TypeScript usage
 - generates a short `AGENTS.md` with repo-specific workflow rules
-- generates project-scoped Codex config and custom agents
+- generates project-scoped Codex config and custom agents for planning,
+  execution/refactors, verification, and review
 - generates repo-local skills for clarification, exploration, planning,
   decision logging, verification, and review
 - generates short `$skill-name` workflow shortcuts so users do not need to keep
@@ -68,7 +69,7 @@ $review-feature
 ```
 
 These are thin workflow entrypoints built on top of the generated planning,
-verification, and review agents plus the installed repo-local skills.
+execution, verification, and review agents plus the installed repo-local skills.
 
 ## Subagent Workflow
 
@@ -85,8 +86,13 @@ In practice, the main Codex session acts as the orchestrator:
 The generated custom agents support that workflow:
 
 - `planner` for planning artifacts
+- `executor` for implementation and refactor work
 - `verifier` for deterministic checks
 - `reviewer` for final review
+
+All four agents are expected to consult the relevant vendored quality skills in
+`.agents/skills/`. Planning and execution especially use those skills to shape
+architecture, file boundaries, implementation details, and UI quality.
 
 This is especially useful for larger changes where exploration, implementation,
 verification, and review benefit from being split into focused jobs. It is a

@@ -11,7 +11,7 @@ It prepares the repository so Codex can work in a repeatable feature workflow:
 
 1. clarify the task when needed
 2. plan the change
-3. implement with subagents when useful
+3. delegate implementation or refactor work to the execution agent
 4. verify the result
 5. review the result
 
@@ -120,6 +120,7 @@ After `init`, the target repository includes:
 - `AGENTS.md`
 - `.codex/config.toml`
 - `.codex/agents/planner.toml`
+- `.codex/agents/executor.toml`
 - `.codex/agents/verifier.toml`
 - `.codex/agents/reviewer.toml`
 - `.agents/skills/*`
@@ -169,8 +170,9 @@ $build-feature implement the approved saved search filters plan
 What Codex should do:
 
 - read `PLAN.md` and `FILE_SPECS.md`
-- implement the approved plan
-- use subagents where helpful for exploration or isolated work
+- spawn `executor`
+- have `executor` implement the approved plan or refactor scope
+- have `executor` consult the relevant vendored quality skills before coding
 - stop for user choice when a meaningful decision is required
 - update `DECISION.md` when the user makes a choice
 - finish with verification and review steps
@@ -241,10 +243,11 @@ Typical pattern:
 In the generated setup:
 
 - `planner` is the planning specialist
+- `executor` is the implementation and refactor specialist
 - `verifier` is the deterministic checks specialist
 - `reviewer` is the final review specialist
 
-Those three are custom agents generated into `.codex/agents/`. The shortcut
+All four are custom agents generated into `.codex/agents/`. The shortcut
 skills are the easy user-facing entrypoints that tell Codex when to use them.
 
 ## Step 7: Know When To Use The Structured Flow

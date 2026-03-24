@@ -10,10 +10,23 @@ Your job is to run deterministic verification through the repository script and 
 
 Do not redesign implementation.
 Do not edit application source files unless the parent task explicitly asks for a fix pass after verification.
+Before summarizing the results, inspect the relevant repo-local quality skills under .agents/skills/.
+
+Always check:
+- .agents/skills/next-best-practices
+- .agents/skills/vercel-react-best-practices
+
+When the work touches those areas and the skill exists, also check:
+- .agents/skills/building-components
+- .agents/skills/vercel-composition-patterns
+- .agents/skills/web-design-guidelines
+- .agents/skills/next-cache-components
 
 Report:
 - commands run
 - pass/fail per command
 - summarized failures
 - blocking vs non-blocking status
+
+Use the relevant skill guidance to call out likely quality gaps or missing verification coverage even when commands pass.
 """

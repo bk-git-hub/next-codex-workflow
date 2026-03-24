@@ -1,3 +1,4 @@
+import executorTemplate from "../templates/codex/agents/executor.toml.hbs";
 import plannerTemplate from "../templates/codex/agents/planner.toml.hbs";
 import reviewerTemplate from "../templates/codex/agents/reviewer.toml.hbs";
 import verifierTemplate from "../templates/codex/agents/verifier.toml.hbs";
@@ -9,6 +10,10 @@ export function generateAgentFiles(): GeneratedFile[] {
     {
       relativePath: ".codex/agents/planner.toml",
       content: renderTemplate(plannerTemplate, {})
+    },
+    {
+      relativePath: ".codex/agents/executor.toml",
+      content: renderTemplate(executorTemplate, {})
     },
     {
       relativePath: ".codex/agents/reviewer.toml",

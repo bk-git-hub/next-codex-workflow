@@ -7,6 +7,10 @@ max_depth = 1
 description = "Create PLAN.md and FILE_SPECS.md before non-trivial code changes."
 config_file = "./agents/planner.toml"
 
+[agents.executor]
+description = "Execute approved implementation and refactor work while following repo-local quality skills."
+config_file = "./agents/executor.toml"
+
 [agents.reviewer]
 description = "Review completed changes for correctness, regressions, Next.js issues, and plan compliance."
 config_file = "./agents/reviewer.toml"
