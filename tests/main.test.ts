@@ -28,6 +28,10 @@ describe("runCli", () => {
 
     expect(exitCode).toBe(0);
     expect(stdout).toHaveBeenCalledOnce();
+    expect(String(stdout.mock.calls[0]?.[0])).toContain("Global options:");
+    expect(String(stdout.mock.calls[0]?.[0])).toContain("--version");
+    expect(String(stdout.mock.calls[0]?.[0])).toContain("Init options:");
+    expect(String(stdout.mock.calls[0]?.[0])).toContain("--help");
     expect(stderr).not.toHaveBeenCalled();
   });
 
