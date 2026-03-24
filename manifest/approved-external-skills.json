@@ -16,6 +16,20 @@
       "preset": "core"
     },
     {
+      "name": "vitest",
+      "source": "https://github.com/antfu/skills/tree/c35a5588a5158b5b404a14fb10469b2b6dc1952b/skills/vitest",
+      "pin": "c35a5588a5158b5b404a14fb10469b2b6dc1952b",
+      "policy": "core-implicit",
+      "preset": "core"
+    },
+    {
+      "name": "playwright-best-practices",
+      "source": "https://github.com/currents-dev/playwright-best-practices-skill/tree/ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b",
+      "pin": "ef329e7e65149918e1ff0eed2cf7d2e6e6f9eb5b",
+      "policy": "core-implicit",
+      "preset": "core"
+    },
+    {
       "name": "building-components",
       "source": "https://skills.sh/vercel/components.build/building-components",
       "pin": "snapshot-2026-03-23",
@@ -33,6 +47,13 @@
       "name": "vercel-composition-patterns",
       "source": "https://skills.sh/vercel-labs/agent-skills/vercel-composition-patterns",
       "pin": "snapshot-2026-03-23",
+      "policy": "explicit-only",
+      "preset": "recommended"
+    },
+    {
+      "name": "playwright-cli",
+      "source": "https://github.com/microsoft/playwright-cli/tree/e63e9b74deac2290f1f3b9800374fa3070efdec4/skills/playwright-cli",
+      "pin": "e63e9b74deac2290f1f3b9800374fa3070efdec4",
       "policy": "explicit-only",
       "preset": "recommended"
     },

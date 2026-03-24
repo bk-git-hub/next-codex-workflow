@@ -15,7 +15,7 @@ Workflow artifacts live in `agent-workflow/artifacts/`.
 # Workflow Shortcuts
 
 - `$plan-feature` to create `PLAN.md` and `FILE_SPECS.md` before coding.
-- `$build-feature` to route approved implementation or refactor work through `executor`, then verification and review.
+- `$build-feature` to route approved implementation or refactor work through `executor`, `tester`, then verification and review.
 - `$verify-feature` to run verification and update `VERIFY.md`.
 - `$review-feature` to run final review and update `REVIEW.md`.
 
@@ -29,7 +29,7 @@ Workflow artifacts live in `agent-workflow/artifacts/`.
 2. Use the planning workflow before introducing new routes, server/client boundaries, state ownership changes, or major UI composition changes.
 3. If more than one viable strategy exists, ask the user to choose.
 4. After a user decision, update `DECISION.md`.
-5. Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `verifier`, `reviewer`, and the repo-local quality skills are all used.
+5. Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `tester`, `verifier`, `reviewer`, and the repo-local quality skills are all used.
 6. After implementation, run verification and update `VERIFY.md`.
 7. After verification, run structured review and update `REVIEW.md`.
 {{performanceRule}}
@@ -37,6 +37,7 @@ Workflow artifacts live in `agent-workflow/artifacts/`.
 # Definition of Done
 
 - Implementation completed.
+- Tests updated or deliberately left unchanged with rationale.
 - Verification attempted.
 - Review completed.
 - Decisions logged when required.

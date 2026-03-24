@@ -1,7 +1,7 @@
 interface:
   display_name: "Build Feature"
-  short_description: "Implement the plan through executor, verifier, and reviewer"
-  default_prompt: "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, telling it to use the relevant repo-local quality skills under .agents/skills/, then spawn verifier and reviewer, and stop if executor spawning is unavailable."
+  short_description: "Implement the plan through executor, tester, verifier, and reviewer"
+  default_prompt: "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, then spawn the agent named tester to choose the right test layer and update tests, then spawn verifier and reviewer. Tell executor and tester to use the relevant repo-local quality skills under .agents/skills/, and stop if executor or tester spawning is unavailable."
 
 policy:
   allow_implicit_invocation: false

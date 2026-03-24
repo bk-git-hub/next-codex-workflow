@@ -20,7 +20,7 @@ During `init`, it:
 - detects router style, package manager, scripts, and TypeScript usage
 - generates a short `AGENTS.md` with repo-specific workflow rules
 - generates project-scoped Codex config and custom agents for planning,
-  execution/refactors, verification, and review
+  execution/refactors, testing, verification, and review
 - generates repo-local skills for clarification, exploration, planning,
   decision logging, verification, and review
 - generates short `$skill-name` workflow shortcuts so users do not need to keep
@@ -69,7 +69,8 @@ $review-feature
 ```
 
 These are thin workflow entrypoints built on top of the generated planning,
-execution, verification, and review agents plus the installed repo-local skills.
+execution, testing, verification, and review agents plus the installed
+repo-local skills.
 
 ## Subagent Workflow
 
@@ -87,12 +88,15 @@ The generated custom agents support that workflow:
 
 - `planner` for planning artifacts
 - `executor` for implementation and refactor work
+- `tester` for test strategy, test updates, and test-focused checks
 - `verifier` for deterministic checks
 - `reviewer` for final review
 
-All four agents are expected to consult the relevant vendored quality skills in
+All five agents are expected to consult the relevant vendored quality skills in
 `.agents/skills/`. Planning and execution especially use those skills to shape
-architecture, file boundaries, implementation details, and UI quality.
+architecture, file boundaries, implementation details, UI quality, and test
+impact. The tester agent uses bundled `vitest`, `playwright-best-practices`,
+and `playwright-cli` guidance where relevant.
 
 This is especially useful for larger changes where exploration, implementation,
 verification, and review benefit from being split into focused jobs. It is a
@@ -122,7 +126,7 @@ quality and parallelism benefit, not a token-saving mode by itself.
   repository.
 
   `minimal`
-  Core external skills only.
+  Core external skills only. This includes the default testing quality skills.
 
   `recommended`
   Core skills plus the supported design/component/composition skills.
@@ -141,10 +145,12 @@ quality and parallelism benefit, not a token-saving mode by itself.
 Current bundled presets:
 
 - `minimal`
-  `next-best-practices`, `vercel-react-best-practices`
+  `next-best-practices`, `vercel-react-best-practices`, `vitest`,
+  `playwright-best-practices`
 - `recommended`
   everything in `minimal`, plus `building-components`,
-  `web-design-guidelines`, and `vercel-composition-patterns`
+  `web-design-guidelines`, `vercel-composition-patterns`, and
+  `playwright-cli`
 - `full`
   everything in `recommended`, plus eligible optional skills such as
   `next-cache-components`
@@ -157,7 +163,11 @@ default because this repository is the installer itself.
 
 - `AGENTS.md`
 - `.codex/config.toml`
-- `.codex/agents/*`
+- `.codex/agents/planner.toml`
+- `.codex/agents/executor.toml`
+- `.codex/agents/tester.toml`
+- `.codex/agents/verifier.toml`
+- `.codex/agents/reviewer.toml`
 - `.agents/skills/*`
 - `agent-workflow/artifacts/PLAN.md`
 - `agent-workflow/artifacts/FILE_SPECS.md`

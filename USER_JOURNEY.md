@@ -12,8 +12,9 @@ It prepares the repository so Codex can work in a repeatable feature workflow:
 1. clarify the task when needed
 2. plan the change
 3. delegate implementation or refactor work to the execution agent
-4. verify the result
-5. review the result
+4. delegate test impact and test updates to the testing agent
+5. verify the result
+6. review the result
 
 ## Who It Is For
 
@@ -121,6 +122,7 @@ After `init`, the target repository includes:
 - `.codex/config.toml`
 - `.codex/agents/planner.toml`
 - `.codex/agents/executor.toml`
+- `.codex/agents/tester.toml`
 - `.codex/agents/verifier.toml`
 - `.codex/agents/reviewer.toml`
 - `.agents/skills/*`
@@ -173,6 +175,9 @@ What Codex should do:
 - spawn `executor`
 - have `executor` implement the approved plan or refactor scope
 - have `executor` consult the relevant vendored quality skills before coding
+- spawn `tester`
+- have `tester` choose the right layer between Vitest-style tests and Playwright
+- have `tester` update focused tests and run test-focused checks
 - stop for user choice when a meaningful decision is required
 - update `DECISION.md` when the user makes a choice
 - finish with verification and review steps
@@ -244,6 +249,7 @@ In the generated setup:
 
 - `planner` is the planning specialist
 - `executor` is the implementation and refactor specialist
+- `tester` is the testing strategy and test authoring specialist
 - `verifier` is the deterministic checks specialist
 - `reviewer` is the final review specialist
 
@@ -358,7 +364,7 @@ The easiest way to understand the product is:
 
 - `init` installs the workflow
 - `$plan-feature` defines the work
-- `$build-feature` performs the work
+- `$build-feature` performs the work and routes through implementation plus testing
 - `$verify-feature` proves the work
 - `$review-feature` critiques the work
 
