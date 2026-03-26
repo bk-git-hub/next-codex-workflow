@@ -1,0 +1,7 @@
+interface:
+  display_name: "gstack Process Review"
+  short_description: "Apply gstack-style planning and review gates in this repo"
+  default_prompt: "Use the gstack process review before substantial next-codex-workflow changes. Restate the problem, challenge the scope, run an engineering review, and preserve this product's identity."
+
+policy:
+  allow_implicit_invocation: false
