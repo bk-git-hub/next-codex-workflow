@@ -1,0 +1,7 @@
+interface:
+  display_name: "gstack Strategist"
+  short_description: "Spawn the gstack strategy wrapper agent"
+  default_prompt: "Use gstack-strategist for substantial next-codex-workflow work. Spawn the gstack-strategist agent, wait for it, and use the original installed gstack planning and review skills."
+
+policy:
+  allow_implicit_invocation: false

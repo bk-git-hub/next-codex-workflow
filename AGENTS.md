@@ -13,14 +13,20 @@ A task is substantial when it changes one or more of these:
 - release policy or testing architecture
 
 Required workflow for substantial work:
-1. Invoke `$gstack-process-review` first. If that skill is unavailable in the current session, follow [GSTACK_CHECKLIST.md](GSTACK_CHECKLIST.md) manually.
+1. Invoke `$gstack-strategist` first.
+2. `$gstack-strategist` must use the original installed `gstack` skills, in order, when relevant:
+   - `$office-hours`
+   - `$plan-ceo-review`
+   - `$plan-eng-review`
+   - `$review`
+3. If the original `gstack` skills are unavailable in the current session, fall back to `$gstack-process-review`. If that is also unavailable, follow [GSTACK_CHECKLIST.md](GSTACK_CHECKLIST.md) manually.
 2. Complete these gates before implementation:
    - Office-hours framing: restate the real problem, user value, and smallest useful wedge.
    - CEO review: challenge scope, alternatives, risks, and success metric.
    - Engineering review: define architecture, failure modes, migration impact, and tests.
    - Pre-ship review: confirm the proposal still fits this product's identity.
-3. Summarize the review outcome briefly before coding.
-4. Do not treat `gstack` as a default runtime dependency or installer requirement for `next-codex-workflow` unless the user explicitly asks for that direction.
+4. Summarize the review outcome briefly before coding.
+5. Do not treat `gstack` as a default runtime dependency or installer requirement for `next-codex-workflow` unless the user explicitly asks for that direction.
 
 Preserve these product guardrails:
 - explicit artifacts

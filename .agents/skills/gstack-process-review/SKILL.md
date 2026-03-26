@@ -7,6 +7,9 @@ metadata:
 
 # Gstack Process Review
 
+This is the fallback path.
+Prefer `$gstack-strategist` first when the original installed gstack skills are available.
+
 This skill is for maintaining `next-codex-workflow`. It does not mean the product should embed `gstack` as a runtime dependency.
 
 Before substantial work, read [../../../GSTACK_CHECKLIST.md](../../../GSTACK_CHECKLIST.md).
