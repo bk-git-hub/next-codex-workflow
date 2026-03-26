@@ -4,3 +4,5 @@ coverage/
 .agents/
 *.log
 .DS_Store
+session_logs/
+tmp/
