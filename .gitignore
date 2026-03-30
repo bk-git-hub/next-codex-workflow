@@ -6,3 +6,4 @@ coverage/
 .DS_Store
 session_logs/
 tmp/
+local-docs/
