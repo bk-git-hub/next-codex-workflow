@@ -99,8 +99,8 @@ npx next-codex-workflow init
 ```
 
 In a normal terminal session, this opens a short interactive installer so the
-user can choose workflow mode, external skill set, and optional performance
-setup.
+user can choose workflow mode, external skill set, optional performance setup,
+and optional stage-prefixed workflow commits.
 
 Example with more features:
 
@@ -120,6 +120,12 @@ If the user wants the old non-interactive path, use:
 npx next-codex-workflow init --yes
 ```
 
+If the user wants automatic workflow commits in the non-interactive path, use:
+
+```bash
+npx next-codex-workflow init --yes --auto-commit
+```
+
 What happens during `init`:
 
 - the repo is validated as a supported Next.js project
@@ -129,6 +135,8 @@ What happens during `init`:
 - repo-local skills are created in `.agents/skills/`
 - bundled external skills are copied into `.agents/skills/`
 - the selected workflow mode is written into the generated repo rules and
+  shortcut skills
+- the auto-commit setting is written into the generated repo rules and
   shortcut skills
 - workflow artifact files are created in `agent-workflow/artifacts/`
 - verification script is created
@@ -183,10 +191,14 @@ What Codex should do:
 
 - spawn `explorer`
 - have `explorer` inspect the relevant code and summarize repo patterns
+- close `explorer` after its summary is integrated
 - spawn `planner`
 - clarify ambiguity if needed
 - create or update `PLAN.md`
 - create or update `FILE_SPECS.md`
+- close `planner` after the planning artifacts are updated
+- if automatic workflow commits are enabled and the tree is safe, create one
+  `plan:` commit
 - stop before implementation
 
 ### Implementation
@@ -203,12 +215,16 @@ What Codex should do:
 - spawn `executor`
 - have `executor` implement the approved plan or refactor scope
 - have `executor` consult the relevant vendored quality skills before coding
+- close `executor` after its implementation summary is integrated
 - spawn `tester`
 - have `tester` choose the right layer between Vitest-style tests and Playwright
 - have `tester` update focused tests and run test-focused checks
+- close `tester` after its test summary is integrated
 - stop for user choice when a meaningful decision is required
 - update `DECISION.md` when the user makes a choice
-- finish with verification and review steps
+- finish with verification and review steps, then close those spawned agents once `VERIFY.md` and `REVIEW.md` are updated
+- if automatic workflow commits are enabled and the tree is safe, create one
+  `build:` commit
 
 ### Verification
 
@@ -223,6 +239,8 @@ What Codex should do:
 - run the deterministic repository verification workflow
 - update `VERIFY.md`
 - report blocking and non-blocking failures
+- if automatic workflow commits are enabled and the tree is safe, create one
+  `verify:` commit
 
 ### Review
 
@@ -237,6 +255,8 @@ What Codex should do:
 - review the finished work
 - look for correctness issues, regressions, and missing tests
 - update `REVIEW.md`
+- if automatic workflow commits are enabled and the tree is safe, create one
+  `review:` commit
 
 ## Step 6: Understand Where Subagents Fit
 
@@ -331,7 +351,7 @@ npx next-codex-workflow update
 
 `update` automatically reuses the saved install-state manifest and refreshes
 files previously managed by this tool. It still does not overwrite user-owned
-files.
+files, and it preserves the previously saved auto-commit setting.
 
 Use `init` again only when you intentionally want to change the installation
 shape, for example switching presets or turning performance mode on:

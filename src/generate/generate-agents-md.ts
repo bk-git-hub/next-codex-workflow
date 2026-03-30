@@ -48,6 +48,9 @@ export function generateAgentsMd(context: GenerationContext): GeneratedFile {
   const performanceRule = context.options.performance
     ? "9. If performance mode is enabled and user-facing routes changed, run performance audit and update `PERF.md`.\n10. Final summaries must reference workflow artifact outputs."
     : "9. Final summaries must reference workflow artifact outputs.";
+  const autoCommitRule = context.options.autoCommit
+    ? "When a workflow shortcut finishes with scoped changes and no unrelated pre-existing changes are mixed in, create a commit using the matching stage prefix: `plan:`, `build:`, `verify:`, or `review:`. If the tree is unsafe, skip the commit and report why."
+    : "Automatic workflow commits are disabled unless the install was configured to enable them.";
 
   const isMultiAgent = context.options.workflowMode === "multi-agent";
 
@@ -59,6 +62,8 @@ export function generateAgentsMd(context: GenerationContext): GeneratedFile {
       commands: formatCommands(context),
       workflowArtifacts: workflowArtifacts.join("\n"),
       performanceRule,
+      autoCommitLabel: context.options.autoCommit ? "enabled" : "disabled",
+      autoCommitRule,
       workflowModeLabel: isMultiAgent ? "multi-agent" : "single-agent",
       planShortcutDescription: isMultiAgent
         ? "route work through `explorer` then `planner` before coding."

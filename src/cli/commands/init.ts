@@ -15,6 +15,7 @@ export interface InitOptions {
   routes: string[];
   externalSkillSet: ExternalSkillSet;
   workflowMode: WorkflowMode;
+  autoCommit: boolean;
   overwriteManaged: boolean;
   dryRun: boolean;
   help: boolean;
@@ -45,6 +46,7 @@ const defaultInitOptions: InitOptions = {
   routes: [],
   externalSkillSet: "recommended",
   workflowMode: "multi-agent",
+  autoCommit: false,
   overwriteManaged: false,
   dryRun: false,
   help: false
@@ -73,6 +75,9 @@ export function parseInitArgs(args: string[]): ParseResult {
           break;
         case "--performance":
           options.performance = true;
+          break;
+        case "--auto-commit":
+          options.autoCommit = true;
           break;
         case "--overwrite-managed":
           options.overwriteManaged = true;
@@ -295,6 +300,7 @@ export function formatInitSummary(result: InitResult): string {
     `Performance enabled: ${result.options.performance ? "yes" : "no"}`,
     `Routes: ${result.options.routes.length > 0 ? result.options.routes.join(", ") : "(none)"}`,
     `Workflow mode: ${result.options.workflowMode}`,
+    `Automatic workflow commits: ${result.options.autoCommit ? "yes" : "no"}`,
     `Overwrite managed: ${result.options.overwriteManaged ? "yes" : "no"}`,
     `Auto-confirm: ${result.options.yes ? "yes" : "no"}`
   ];

@@ -90,6 +90,7 @@ describe("runUpdateCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -131,6 +132,7 @@ describe("runUpdateCommand", () => {
         routes: ["/", "/dashboard"],
         externalSkillSet: "full",
         workflowMode: "single-agent",
+        autoCommit: true,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -155,6 +157,7 @@ describe("runUpdateCommand", () => {
     expect(updateResult.options.performance).toBe(true);
     expect(updateResult.options.externalSkillSet).toBe("full");
     expect(updateResult.options.workflowMode).toBe("single-agent");
+    expect(updateResult.options.autoCommit).toBe(true);
     expect(updateResult.options.routes).toEqual(["/", "/dashboard"]);
     expect(updateResult.warnings).toContain(
       "No install-state manifest was found. Update inferred the existing workflow options from the generated files in this repository."
@@ -167,6 +170,7 @@ describe("runUpdateCommand", () => {
     expect(installState).toContain('"externalSkillSet": "full"');
     expect(installState).toContain('"performance": true');
     expect(installState).toContain('"workflowMode": "single-agent"');
+    expect(installState).toContain('"autoCommit": true');
   });
 
   it("infers the workflow mode from AGENTS.md when the plan shortcut file is unavailable", async () => {
@@ -180,6 +184,7 @@ describe("runUpdateCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "single-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -203,6 +208,7 @@ describe("runUpdateCommand", () => {
 
     expect(updateResult.exitCode).toBe(0);
     expect(updateResult.options.workflowMode).toBe("single-agent");
+    expect(updateResult.options.autoCommit).toBe(false);
   });
 
   it("does not reopen the interactive installer during update", async () => {
@@ -216,6 +222,7 @@ describe("runUpdateCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -229,7 +236,8 @@ describe("runUpdateCommand", () => {
       workflowMode: "single-agent" as const,
       externalSkillSet: "full" as const,
       performance: true,
-      routes: ["/", "/dashboard"]
+      routes: ["/", "/dashboard"],
+      autoCommit: true
     }));
 
     const updateResult = await runUpdateCommand(
@@ -246,6 +254,7 @@ describe("runUpdateCommand", () => {
     expect(updateResult.options.workflowMode).toBe("multi-agent");
     expect(updateResult.options.externalSkillSet).toBe("recommended");
     expect(updateResult.options.performance).toBe(false);
+    expect(updateResult.options.autoCommit).toBe(false);
   });
 
   it("fails when no existing workflow installation is present", async () => {

@@ -38,6 +38,7 @@ function formatHelp(): string {
     "Init options:",
     "  --yes                                     Accept default choices automatically",
     "  --performance                             Generate Lighthouse performance workflow files",
+    "  --auto-commit                             Enable stage-prefixed workflow commits after successful steps",
     "  --routes <comma-separated-routes>         Routes to audit when performance mode is enabled",
     "  --external-skill-set <minimal|recommended|full>",
     "                                            Choose which bundled external skills to copy",

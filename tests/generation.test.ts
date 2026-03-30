@@ -100,6 +100,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -208,6 +209,7 @@ describe("workflow file generation", () => {
     expect(agentsMd).toContain("`explorer`");
     expect(agentsMd).toContain("`executor`");
     expect(agentsMd).toContain("`tester`");
+    expect(agentsMd).toContain("Automatic workflow commits: disabled");
     expect(codexConfig).toContain("[agents.explorer]");
     expect(codexConfig).toContain("[agents.executor]");
     expect(codexConfig).toContain("[agents.tester]");
@@ -230,6 +232,7 @@ describe("workflow file generation", () => {
     expect(installState).toContain("\"externalSkillSet\": \"recommended\"");
     expect(installState).toContain("\"performance\": false");
     expect(installState).toContain("\"workflowMode\": \"multi-agent\"");
+    expect(installState).toContain("\"autoCommit\": false");
     expect(skillsLock).toContain("\"next-best-practices\"");
     expect(skillsLock).toContain("\"vitest\"");
     expect(skillsLock).toContain("\"playwright-best-practices\"");
@@ -237,11 +240,20 @@ describe("workflow file generation", () => {
     expect(planFeatureSkill).toContain("Spawn the agent named `explorer` now");
     expect(planFeatureSkill).toContain("Spawn the agent named `planner` now");
     expect(planFeatureSkill).toContain("together with the `explorer` findings");
+    expect(planFeatureSkill).toContain("close the `explorer` agent");
+    expect(planFeatureSkill).toContain("close the `planner` agent");
     expect(planFeatureSkill).toContain("run `/multi-agent`");
     expect(verifyFeatureSkill).toContain("Spawn the agent named `verifier` now");
+    expect(verifyFeatureSkill).toContain("Close the `verifier` agent");
     expect(reviewFeatureSkill).toContain("Spawn the agent named `reviewer` now");
+    expect(reviewFeatureSkill).toContain("Close the `reviewer` agent");
     expect(buildFeatureSkill).toContain("Spawn the agent named `tester` now");
+    expect(buildFeatureSkill).toContain("close the `executor` agent");
+    expect(buildFeatureSkill).toContain("close the `tester` agent");
+    expect(buildFeatureSkill).toContain("Close the `verifier` agent");
+    expect(buildFeatureSkill).toContain("Close the `reviewer` agent");
     expect(buildFeatureMetadata).toContain("agent named executor immediately");
+    expect(buildFeatureMetadata).toContain("close executor after integrating");
     expect(buildFeatureMetadata).toContain("agent named tester");
     expect(buildFeatureMetadata).toContain("repo-local quality skills");
     expect(externalSkillFile).toContain("name: next-best-practices");
@@ -267,6 +279,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -291,6 +304,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -314,6 +328,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: true,
         dryRun: false,
         help: false
@@ -339,6 +354,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -357,6 +373,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -381,6 +398,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -402,6 +420,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -421,6 +440,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: true,
         dryRun: false,
         help: false
@@ -445,6 +465,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -511,6 +532,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -555,6 +577,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "minimal",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -587,6 +610,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "full",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -615,6 +639,7 @@ describe("workflow file generation", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "single-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
@@ -648,11 +673,66 @@ describe("workflow file generation", () => {
 
     expect(agentsMd).toContain("Current workflow mode: single-agent");
     expect(installState).toContain('"workflowMode": "single-agent"');
+    expect(installState).toContain('"autoCommit": false');
     expect(planFeatureSkill).toContain("This repository uses the single-agent workflow mode.");
     expect(planFeatureSkill).not.toContain("This skill requires Codex multi-agent.");
     expect(buildFeatureSkill).toContain("Implement the approved plan directly in the current session.");
     expect(buildFeatureSkill).not.toContain("Spawn the agent named `executor`");
     expect(verifyFeatureSkill).toContain("Run the repository verification workflow in the current session.");
     expect(reviewFeatureSkill).toContain("Perform the final review in the current session.");
+  });
+
+  it("generates safe auto-commit instructions when automatic workflow commits are enabled", async () => {
+    const rootDir = await createTempRepository();
+    await createSupportedRepository(rootDir);
+
+    const result = await runInitCommand(
+      {
+        yes: false,
+        performance: false,
+        routes: [],
+        externalSkillSet: "recommended",
+        workflowMode: "multi-agent",
+        autoCommit: true,
+        overwriteManaged: false,
+        dryRun: false,
+        help: false
+      },
+      { cwd: rootDir }
+    );
+
+    expect(result.exitCode).toBe(0);
+
+    const agentsMd = await readFile(path.join(rootDir, "AGENTS.md"), "utf8");
+    const installState = await readFile(
+      path.join(rootDir, "agent-workflow", "manifest", "install-state.json"),
+      "utf8"
+    );
+    const planFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "plan-feature", "SKILL.md"),
+      "utf8"
+    );
+    const buildFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "build-feature", "SKILL.md"),
+      "utf8"
+    );
+    const verifyFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "verify-feature", "SKILL.md"),
+      "utf8"
+    );
+    const reviewFeatureSkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "review-feature", "SKILL.md"),
+      "utf8"
+    );
+
+    expect(agentsMd).toContain("Automatic workflow commits: enabled");
+    expect(agentsMd).toContain("create a commit using the matching stage prefix");
+    expect(installState).toContain('"autoCommit": true');
+    expect(planFeatureSkill).toContain("prefix `plan:`");
+    expect(buildFeatureSkill).toContain("prefix `build:`");
+    expect(verifyFeatureSkill).toContain("prefix `verify:`");
+    expect(reviewFeatureSkill).toContain("prefix `review:`");
+    expect(buildFeatureSkill).toContain("git status --short");
+    expect(buildFeatureSkill).toContain("unrelated pre-existing changes");
   });
 });

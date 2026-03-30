@@ -26,6 +26,7 @@ During `init`, it:
 - generates short `$skill-name` workflow shortcuts so users do not need to keep
   retyping long Codex prompts
 - supports both `multi-agent` and `single-agent` workflow modes
+- can optionally create stage-prefixed git commits after completed workflow steps
 - vendors approved external skills into the repository from bundled snapshots
   shipped with this package
 - creates workflow artifact files as starter templates immediately during init
@@ -49,7 +50,8 @@ npx next-codex-workflow init
 ```
 
 When run in a normal terminal without `--yes`, `init` now guides the user
-through workflow mode, skill preset, and optional performance setup.
+through workflow mode, skill preset, optional performance setup, and optional
+automatic workflow commits.
 
 After upgrading the package in a repo that already uses this workflow:
 
@@ -131,6 +133,20 @@ quality and parallelism benefit, not a token-saving mode by itself.
   Enables performance-mode generation. This adds the performance audit skill,
   `agent-workflow/artifacts/PERF.md`, `scripts/run-lighthouse.mjs`,
   `agent-workflow/config/lighthouserc.cjs`, and `agent-workflow/config/budgets.json`.
+- `--auto-commit`
+  Enables stage-prefixed workflow commits after completed shortcut steps.
+  Generated prompts only attempt this when the git tree is scoped to the
+  current workflow step.
+
+  Prefixes:
+
+  - `plan:`
+  - `build:`
+  - `verify:`
+  - `review:`
+
+  If unrelated pre-existing changes are present, the generated workflow should
+  skip the commit and report why instead of creating a mixed commit.
 - `--routes <comma-separated-routes>`
   Sets the routes used by the generated Lighthouse performance workflow. This is
   only meaningful together with `--performance`.
@@ -159,7 +175,8 @@ quality and parallelism benefit, not a token-saving mode by itself.
 
   `multi-agent`
   Uses `explorer`, `planner`, `executor`, `tester`, `verifier`, and `reviewer`
-  through the generated shortcut skills.
+  through the generated shortcut skills, and the generated prompts tell Codex
+  to close each spawned agent after its result is integrated.
 
   `single-agent`
   Keeps the same workflow artifacts and quality-skill guidance, but performs
@@ -190,6 +207,7 @@ pnpm next-codex-workflow update
 `update`:
 
 - reuses the saved install-state manifest from the previous install
+- preserves the saved workflow auto-commit setting from the previous install
 - refreshes files previously managed by this tool
 - still stops on user-owned unmanaged files
 - can fall back to inferring the prior install shape for older repositories

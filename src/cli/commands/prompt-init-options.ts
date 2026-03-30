@@ -5,7 +5,7 @@ import type { ExternalSkillSet, InitOptions, WorkflowMode } from "./init.js";
 
 export type InitPrompter = (
   options: InitOptions
-) => Promise<Pick<InitOptions, "performance" | "routes" | "externalSkillSet" | "workflowMode">>;
+) => Promise<Pick<InitOptions, "performance" | "routes" | "externalSkillSet" | "workflowMode" | "autoCommit">>;
 
 function formatChoiceLabel<T extends string>(label: string, value: T, current: T): string {
   return `${label}${value === current ? " [default]" : ""}`;
@@ -68,7 +68,7 @@ function parseRoutes(rawValue: string): string[] {
 }
 
 export async function promptInitOptions(options: InitOptions): Promise<
-  Pick<InitOptions, "performance" | "routes" | "externalSkillSet" | "workflowMode">
+  Pick<InitOptions, "performance" | "routes" | "externalSkillSet" | "workflowMode" | "autoCommit">
 > {
   const rl = createInterface({
     input: process.stdin,
@@ -140,6 +140,11 @@ export async function promptInitOptions(options: InitOptions): Promise<
       `Enable performance workflow? [${options.performance ? "Y/n" : "y/N"}]: `,
       options.performance
     );
+    const autoCommit = await askYesNo(
+      rl,
+      `Enable automatic workflow commits with stage prefixes? [${options.autoCommit ? "Y/n" : "y/N"}]: `,
+      options.autoCommit
+    );
 
     let routes = options.routes;
 
@@ -158,7 +163,8 @@ export async function promptInitOptions(options: InitOptions): Promise<
       workflowMode,
       externalSkillSet,
       performance,
-      routes
+      routes,
+      autoCommit
     };
   } finally {
     rl.close();

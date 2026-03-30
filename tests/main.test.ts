@@ -31,6 +31,7 @@ describe("runCli", () => {
     expect(String(stdout.mock.calls[0]?.[0])).toContain("Global options:");
     expect(String(stdout.mock.calls[0]?.[0])).toContain("--version");
     expect(String(stdout.mock.calls[0]?.[0])).toContain("Init options:");
+    expect(String(stdout.mock.calls[0]?.[0])).toContain("--auto-commit");
     expect(String(stdout.mock.calls[0]?.[0])).toContain("--help");
     expect(stderr).not.toHaveBeenCalled();
   });

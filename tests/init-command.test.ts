@@ -35,6 +35,7 @@ describe("parseInitArgs", () => {
       "full",
       "--workflow-mode",
       "single-agent",
+      "--auto-commit",
       "--overwrite-managed",
       "--dry-run"
     ]);
@@ -51,6 +52,7 @@ describe("parseInitArgs", () => {
       routes: ["/", "/dashboard"],
       externalSkillSet: "full",
       workflowMode: "single-agent",
+      autoCommit: true,
       overwriteManaged: true,
       dryRun: true,
       help: false
@@ -117,6 +119,7 @@ describe("runInitCommand", () => {
       routes: ["/"],
       externalSkillSet: "recommended",
       workflowMode: "multi-agent",
+      autoCommit: false,
       overwriteManaged: false,
       dryRun: true,
       help: false
@@ -170,6 +173,7 @@ describe("runInitCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -216,6 +220,7 @@ describe("runInitCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "single-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -258,7 +263,8 @@ describe("runInitCommand", () => {
       workflowMode: "single-agent" as const,
       externalSkillSet: "full" as const,
       performance: true,
-      routes: ["/", "/dashboard"]
+      routes: ["/", "/dashboard"],
+      autoCommit: true
     }));
 
     const result = await runInitCommand(
@@ -268,6 +274,7 @@ describe("runInitCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -281,6 +288,7 @@ describe("runInitCommand", () => {
     expect(result.options.externalSkillSet).toBe("full");
     expect(result.options.performance).toBe(true);
     expect(result.options.routes).toEqual(["/", "/dashboard"]);
+    expect(result.options.autoCommit).toBe(true);
   });
 
   it("skips the interactive installer when --yes is used", async () => {
@@ -311,7 +319,8 @@ describe("runInitCommand", () => {
       workflowMode: "single-agent" as const,
       externalSkillSet: "full" as const,
       performance: true,
-      routes: ["/", "/dashboard"]
+      routes: ["/", "/dashboard"],
+      autoCommit: true
     }));
 
     const result = await runInitCommand(
@@ -321,6 +330,7 @@ describe("runInitCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: true,
         help: false
@@ -332,6 +342,7 @@ describe("runInitCommand", () => {
     expect(prompter).not.toHaveBeenCalled();
     expect(result.options.workflowMode).toBe("multi-agent");
     expect(result.options.externalSkillSet).toBe("recommended");
+    expect(result.options.autoCommit).toBe(false);
   });
 
   it("returns an unsupported repository error with exit code 2", async () => {
@@ -346,6 +357,7 @@ describe("runInitCommand", () => {
         routes: [],
         externalSkillSet: "recommended",
         workflowMode: "multi-agent",
+        autoCommit: false,
         overwriteManaged: false,
         dryRun: false,
         help: false
