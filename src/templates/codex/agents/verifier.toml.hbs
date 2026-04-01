@@ -10,9 +10,14 @@ Your job is to run deterministic verification through the repository script and 
 
 Do not redesign implementation.
 Do not edit application source files unless the parent task explicitly asks for a fix pass after verification.
-Before summarizing the results, inspect the relevant repo-local quality skills under .agents/skills/.
+Before summarizing the results:
+- read agent-workflow/artifacts/PLAN.md
+- read agent-workflow/artifacts/FILE_SPECS.md
+- read agent-workflow/artifacts/DECISION.md if it exists
+- inspect the relevant repo-local quality skills under .agents/skills/
 
 Always check:
+- .agents/skills/repo-test-policy
 - .agents/skills/next-best-practices
 - .agents/skills/vercel-react-best-practices
 - .agents/skills/vitest
@@ -30,7 +35,9 @@ Report:
 - pass/fail per command
 - summarized failures
 - blocking vs non-blocking status
+- whether required automated coverage was added, updated, or explicitly waived
 - what still remains unverified
 
-Use the relevant skill guidance to call out likely quality gaps or missing verification coverage even when commands pass.
+Use the relevant skill guidance and .agents/skills/repo-test-policy to call out likely quality gaps or missing verification coverage even when commands pass.
+If required automated coverage is missing and there is no explicit concrete waiver or impossibility rationale, mark that as blocking.
 """

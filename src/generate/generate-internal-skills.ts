@@ -10,6 +10,7 @@ import fileSpecTemplate from "../templates/internal-skills/implementation-strate
 import planTemplate from "../templates/internal-skills/implementation-strategy/references/plan-template.md.hbs";
 import planFeatureSkillTemplate from "../templates/internal-skills/plan-feature/SKILL.md.hbs";
 import planFeatureMetadataTemplate from "../templates/internal-skills/plan-feature/agents/openai.yaml.hbs";
+import repoTestPolicySkillTemplate from "../templates/internal-skills/repo-test-policy/SKILL.md.hbs";
 import repoExplorationSkillTemplate from "../templates/internal-skills/repo-exploration/SKILL.md.hbs";
 import explorationChecklistTemplate from "../templates/internal-skills/repo-exploration/references/exploration-checklist.md.hbs";
 import reviewFeatureSkillTemplate from "../templates/internal-skills/review-feature/SKILL.md.hbs";
@@ -64,9 +65,12 @@ function createModeTemplateValues(context: GenerationContext): Record<string, st
         "4. Inspect the relevant vendored quality skills under `.agents/skills/`, especially `next-best-practices` and `vercel-react-best-practices`, before making implementation choices.",
         "5. Implement the approved plan directly in the current session.",
         "6. If multiple viable strategies remain, stop for user choice and append the decision to `DECISION.md`.",
-        "7. Assess test impact in the current session, update focused tests, and prefer Playwright for async Server Component-heavy flows.",
-        "8. Run deterministic verification in the current session and update `agent-workflow/artifacts/VERIFY.md`.",
-        "9. Perform a structured review in the current session and update `agent-workflow/artifacts/REVIEW.md`.",
+        "7. Inspect `.agents/skills/repo-test-policy`, determine the required automated coverage by change type, and add or update the matching tests in the current session.",
+        "8. If routing, modal/history, query-param UI state, or multi-step browser behavior changed and the repo supports Playwright, add or update Playwright coverage unless impossible.",
+        "9. If pure logic, parsers, transforms, selectors, or provider/state logic changed, add or update Vitest-style coverage unless impossible.",
+        "10. If no automated test is added or updated, record a concrete rationale that names what remains unverified.",
+        "11. Run deterministic verification in the current session and update `agent-workflow/artifacts/VERIFY.md`.",
+        "12. Perform a structured review in the current session and update `agent-workflow/artifacts/REVIEW.md`.",
         buildAutoCommitStep
       ].filter(Boolean).join("\n"),
       buildModeGuardrails: [
@@ -76,8 +80,8 @@ function createModeTemplateValues(context: GenerationContext): Record<string, st
       ].filter(Boolean).join("\n"),
       buildFeatureShortDescription: "Implement the plan in one session with testing, verification, and review",
       buildFeatureDefaultPrompt: context.options.autoCommit
-        ? "Use $build-feature to implement the approved plan in PLAN.md directly in the current session, inspect the relevant repo-local quality skills under .agents/skills/, assess test impact and update tests, then update VERIFY.md and REVIEW.md without spawning subagents. If the tree is safe, create a stage-scoped commit using the prefix `build:` and report when auto-commit is skipped."
-        : "Use $build-feature to implement the approved plan in PLAN.md directly in the current session, inspect the relevant repo-local quality skills under .agents/skills/, assess test impact and update tests, then update VERIFY.md and REVIEW.md without spawning subagents.",
+        ? "Use $build-feature to implement the approved plan in PLAN.md directly in the current session, inspect the relevant repo-local quality skills under .agents/skills/ including .agents/skills/repo-test-policy, add or update the required automated tests by change type, then update VERIFY.md and REVIEW.md without spawning subagents. If the tree is safe, create a stage-scoped commit using the prefix `build:` and report when auto-commit is skipped."
+        : "Use $build-feature to implement the approved plan in PLAN.md directly in the current session, inspect the relevant repo-local quality skills under .agents/skills/ including .agents/skills/repo-test-policy, add or update the required automated tests by change type, then update VERIFY.md and REVIEW.md without spawning subagents.",
       verifyModeWorkflow: [
         "1. This repository uses the single-agent workflow mode.",
         "2. Run the repository verification workflow in the current session.",
@@ -138,8 +142,8 @@ function createModeTemplateValues(context: GenerationContext): Record<string, st
       "7. Wait for the spawned `executor` agent to finish.",
       "8. Integrate the `executor` result, then close the `executor` agent once its work is captured.",
       "9. If multiple viable strategies remain, stop for user choice and append the decision to `DECISION.md`.",
-      "10. Spawn the agent named `tester` now and delegate test impact assessment, test updates, and test-focused checks.",
-      "11. Tell the `tester` agent to inspect `.agents/skills/vitest` and `.agents/skills/playwright-best-practices`, use `.agents/skills/playwright-cli` when browser inspection is relevant, and prefer Playwright for async Server Component-heavy flows.",
+      "10. Spawn the agent named `tester` now and delegate required automated coverage by change type, test updates, and test-focused checks.",
+      "11. Tell the `tester` agent to inspect `.agents/skills/repo-test-policy`, `.agents/skills/vitest`, and `.agents/skills/playwright-best-practices`, use `.agents/skills/playwright-cli` when browser inspection is relevant, and follow the repo test policy before deciding whether tests can be skipped.",
       "12. Wait for the spawned `tester` agent to finish.",
       "13. Integrate the `tester` result, then close the `tester` agent once test updates and findings are captured.",
       "14. Spawn the agent named `verifier` and wait for it to update `agent-workflow/artifacts/VERIFY.md`.",
@@ -159,8 +163,8 @@ function createModeTemplateValues(context: GenerationContext): Record<string, st
     ].filter(Boolean).join("\n"),
     buildFeatureShortDescription: "Implement the plan through executor, tester, verifier, and reviewer",
     buildFeatureDefaultPrompt: context.options.autoCommit
-      ? "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, close executor after integrating its implementation summary, then spawn the agent named tester to choose the right test layer and update tests, close tester after integrating its test summary, then spawn verifier and reviewer and close each one after its artifact is updated. Tell executor and tester to use the relevant repo-local quality skills under .agents/skills/, and if the tree is safe create a stage-scoped commit using the prefix `build:`. Stop if executor or tester spawning is unavailable."
-      : "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, close executor after integrating its implementation summary, then spawn the agent named tester to choose the right test layer and update tests, close tester after integrating its test summary, then spawn verifier and reviewer and close each one after its artifact is updated. Tell executor and tester to use the relevant repo-local quality skills under .agents/skills/, and stop if executor or tester spawning is unavailable.",
+      ? "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, close executor after integrating its implementation summary, then spawn the agent named tester to inspect .agents/skills/repo-test-policy, add or update the required automated tests by change type, and close tester after integrating its test summary, then spawn verifier and reviewer and close each one after its artifact is updated. Tell executor and tester to use the relevant repo-local quality skills under .agents/skills/, and if the tree is safe create a stage-scoped commit using the prefix `build:`. Stop if executor or tester spawning is unavailable."
+      : "Use $build-feature to implement the approved plan in PLAN.md by spawning the agent named executor immediately, close executor after integrating its implementation summary, then spawn the agent named tester to inspect .agents/skills/repo-test-policy, add or update the required automated tests by change type, and close tester after integrating its test summary, then spawn verifier and reviewer and close each one after its artifact is updated. Tell executor and tester to use the relevant repo-local quality skills under .agents/skills/, and stop if executor or tester spawning is unavailable.",
     verifyModeWorkflow: [
       "1. This skill requires Codex multi-agent. If multi-agent is unavailable, stop and tell the user to run `/multi-agent` and start a new Codex session before retrying.",
       "2. Spawn the agent named `verifier` now and delegate the repository verification workflow.",
@@ -217,6 +221,10 @@ export function generateInternalSkills(context: GenerationContext): GeneratedFil
     {
       relativePath: ".agents/skills/repo-exploration/SKILL.md",
       content: renderTemplate(repoExplorationSkillTemplate, {})
+    },
+    {
+      relativePath: ".agents/skills/repo-test-policy/SKILL.md",
+      content: renderTemplate(repoTestPolicySkillTemplate, {})
     },
     {
       relativePath: ".agents/skills/repo-exploration/references/exploration-checklist.md",

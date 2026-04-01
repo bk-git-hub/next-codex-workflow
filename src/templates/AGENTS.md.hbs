@@ -42,7 +42,9 @@ Automatic workflow commits: {{autoCommitLabel}}
 # Definition of Done
 
 - Implementation completed.
-- Tests updated or deliberately left unchanged with rationale.
+- Matching automated tests added or updated when a suitable layer exists.
+- Manual QA only is not sufficient for routing, modal, browser-history, or query-state flows when Playwright already exists in the repo.
+- Any missing required automated coverage is explicitly waived with rationale and remaining gaps called out.
 - Verification attempted.
 - Review completed.
 - Decisions logged when required.

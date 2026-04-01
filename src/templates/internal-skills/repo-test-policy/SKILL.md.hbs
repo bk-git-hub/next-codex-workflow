@@ -1,0 +1,48 @@
+---
+name: repo-test-policy
+description: Hard rules for deciding required automated coverage by change type in this repository. Use when planning, implementing, testing, or verifying feature work.
+---
+
+# Repo Test Policy
+
+This skill defines the repository's required automated coverage rules.
+
+Use it before deciding whether tests are optional.
+
+## Required Coverage By Change Type
+
+- Routing changes, intercepted routes, modal routing, browser history, URL/query-param UI state, and multi-step browser flows:
+  Playwright is required when the repository already supports Playwright, unless impossible.
+- Modal, dialog, overlay, or back/forward navigation behavior:
+  Playwright is required when the repository already supports Playwright, unless impossible.
+- Pure transforms, parsers, normalizers, selectors, and data-only services:
+  Vitest-style coverage is required unless impossible.
+- Provider, store, reducer, state, or hook logic that drives UI behavior:
+  Vitest-style or focused integration coverage is required unless impossible.
+- Accessibility-critical interactive surfaces:
+  Update automated assertions in the most suitable existing layer when practical.
+
+## Waiver Rules
+
+- "Manual QA only" is not sufficient when the repository already has a suitable automated test layer.
+- If no new or updated automated test is added, the rationale must name:
+  - why the required layer could not be used, or
+  - why existing automated coverage is already sufficient
+- Every waiver must also name what still remains unverified.
+
+## Planner Requirements
+
+- Record the required test layer in `PLAN.md`.
+- Name the likely affected test files in `FILE_SPECS.md` when possible.
+- Surface any likely coverage gap early instead of leaving it to the tester.
+
+## Tester Requirements
+
+- Add or update the required automated tests by change type.
+- Keep new coverage focused on the changed behavior.
+- Treat the required layer as part of the feature deliverable, not optional follow-up work.
+
+## Verifier Requirements
+
+- Confirm that required automated coverage was added or explicitly waived.
+- Treat missing required automated coverage as blocking unless the waiver is concrete and justified.

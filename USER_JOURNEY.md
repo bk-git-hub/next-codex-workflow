@@ -13,7 +13,7 @@ It prepares the repository so Codex can work in a repeatable feature workflow:
 2. plan the change
 3. explore the existing codebase before planning
 4. delegate implementation or refactor work to the execution agent
-5. delegate test impact and test updates to the testing agent
+5. delegate required automated coverage and test updates to the testing agent
 6. verify the result
 7. review the result
 
@@ -217,8 +217,9 @@ What Codex should do:
 - have `executor` consult the relevant vendored quality skills before coding
 - close `executor` after its implementation summary is integrated
 - spawn `tester`
-- have `tester` choose the right layer between Vitest-style tests and Playwright
-- have `tester` update focused tests and run test-focused checks
+- have `tester` inspect the repo test policy before deciding whether tests can be skipped
+- have `tester` choose the required layer between Vitest-style tests and Playwright
+- have `tester` add or update the required automated tests and run test-focused checks
 - close `tester` after its test summary is integrated
 - stop for user choice when a meaningful decision is required
 - update `DECISION.md` when the user makes a choice
@@ -298,7 +299,7 @@ In the generated setup:
 - `explorer` is the repository inspection specialist
 - `planner` is the planning specialist
 - `executor` is the implementation and refactor specialist
-- `tester` is the testing strategy and test authoring specialist
+- `tester` is the testing policy and test authoring specialist
 - `verifier` is the deterministic checks specialist
 - `reviewer` is the final review specialist
 

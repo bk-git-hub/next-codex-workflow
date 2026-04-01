@@ -109,15 +109,18 @@ The generated custom agents support that workflow:
 - `explorer` for read-only repository inspection before planning
 - `planner` for planning artifacts
 - `executor` for implementation and refactor work
-- `tester` for test strategy, test updates, and test-focused checks
+- `tester` for required automated coverage, test updates, and test-focused checks
 - `verifier` for deterministic checks
 - `reviewer` for final review
 
 All six agents are expected to consult the relevant vendored quality skills in
 `.agents/skills/`. Planning and execution especially use those skills to shape
 architecture, file boundaries, implementation details, UI quality, and test
-impact. The tester agent uses bundled `vitest`, `playwright-best-practices`,
-and `playwright-cli` guidance where relevant.
+impact. The tester and verifier agents also inspect the generated
+`repo-test-policy` skill so routing and browser behavior changes trigger
+Playwright coverage, while pure logic and service changes trigger Vitest-style
+coverage. The tester agent uses bundled `vitest`,
+`playwright-best-practices`, and `playwright-cli` guidance where relevant.
 
 This is especially useful for larger changes where exploration, implementation,
 verification, and review benefit from being split into focused jobs. It is a

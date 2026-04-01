@@ -81,8 +81,8 @@ export function generateAgentsMd(context: GenerationContext): GeneratedFile {
         ? "Route non-trivial planning through `$plan-feature` so `explorer` surfaces the current repo patterns before `planner` writes the artifacts."
         : "Route non-trivial planning through `$plan-feature` so the current session performs exploration before writing the artifacts.",
       implementationRoutingRule: isMultiAgent
-        ? "Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `tester`, `verifier`, `reviewer`, and the repo-local quality skills are all used."
-        : "Route non-trivial implementation or refactor work through `$build-feature` so the current session still follows the full plan, testing, verification, review, and quality-skill workflow."
+        ? "Route non-trivial implementation or refactor work through `$build-feature` so `executor`, `tester`, `verifier`, `reviewer`, the repo-local quality skills, and the repo test policy are all used."
+        : "Route non-trivial implementation or refactor work through `$build-feature` so the current session still follows the full plan, required test policy, verification, review, and quality-skill workflow."
     })
   };
 }

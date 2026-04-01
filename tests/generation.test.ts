@@ -136,6 +136,10 @@ describe("workflow file generation", () => {
       path.join(rootDir, ".agents", "skills", "task-clarification", "SKILL.md"),
       "utf8"
     );
+    const repoTestPolicySkill = await readFile(
+      path.join(rootDir, ".agents", "skills", "repo-test-policy", "SKILL.md"),
+      "utf8"
+    );
     const externalSkillFile = await readFile(
       path.join(rootDir, ".agents", "skills", "next-best-practices", "SKILL.md"),
       "utf8"
@@ -209,6 +213,8 @@ describe("workflow file generation", () => {
     expect(agentsMd).toContain("`explorer`");
     expect(agentsMd).toContain("`executor`");
     expect(agentsMd).toContain("`tester`");
+    expect(agentsMd).toContain("Matching automated tests added or updated when a suitable layer exists.");
+    expect(agentsMd).toContain("Manual QA only is not sufficient");
     expect(agentsMd).toContain("Automatic workflow commits: disabled");
     expect(codexConfig).toContain("[agents.explorer]");
     expect(codexConfig).toContain("[agents.executor]");
@@ -216,14 +222,21 @@ describe("workflow file generation", () => {
     expect(codexConfig).toContain("[agents.verifier]");
     expect(explorerAgent).toContain('name = "explorer"');
     expect(explorerAgent).toContain("Do not update workflow artifacts.");
+    expect(plannerAgent).toContain(".agents/skills/repo-test-policy");
     expect(plannerAgent).toContain(".agents/skills/next-best-practices");
     expect(plannerAgent).toContain(".agents/skills/vitest");
     expect(executorAgent).toContain('name = "executor"');
     expect(executorAgent).toContain(".agents/skills/vercel-react-best-practices");
     expect(executorAgent).toContain(".agents/skills/playwright-best-practices");
     expect(testerAgent).toContain('name = "tester"');
+    expect(testerAgent).toContain(".agents/skills/repo-test-policy");
+    expect(testerAgent).toContain("require Playwright for routing changes");
+    expect(testerAgent).toContain("manual QA only");
     expect(testerAgent).toContain(".agents/skills/vitest");
     expect(testerAgent).toContain("prefer Playwright for async Server Component-heavy flows");
+    expect(verifierAgent).toContain(".agents/skills/repo-test-policy");
+    expect(verifierAgent).toContain("required automated coverage was added, updated, or explicitly waived");
+    expect(verifierAgent).toContain("mark that as blocking");
     expect(verifierAgent).toContain(".agents/skills/next-best-practices");
     expect(reviewerAgent).toContain(".agents/skills/next-best-practices");
     expect(verifyScript).toContain("CHECK_ORDER");
@@ -237,6 +250,9 @@ describe("workflow file generation", () => {
     expect(skillsLock).toContain("\"vitest\"");
     expect(skillsLock).toContain("\"playwright-best-practices\"");
     expect(skillFile).toContain("name: task-clarification");
+    expect(repoTestPolicySkill).toContain("name: repo-test-policy");
+    expect(repoTestPolicySkill).toContain("Playwright is required");
+    expect(repoTestPolicySkill).toContain("Vitest-style coverage is required");
     expect(planFeatureSkill).toContain("Spawn the agent named `explorer` now");
     expect(planFeatureSkill).toContain("Spawn the agent named `planner` now");
     expect(planFeatureSkill).toContain("together with the `explorer` findings");
@@ -248,6 +264,8 @@ describe("workflow file generation", () => {
     expect(reviewFeatureSkill).toContain("Spawn the agent named `reviewer` now");
     expect(reviewFeatureSkill).toContain("Close the `reviewer` agent");
     expect(buildFeatureSkill).toContain("Spawn the agent named `tester` now");
+    expect(buildFeatureSkill).toContain(".agents/skills/repo-test-policy");
+    expect(buildFeatureSkill).toContain("required automated coverage by change type");
     expect(buildFeatureSkill).toContain("close the `executor` agent");
     expect(buildFeatureSkill).toContain("close the `tester` agent");
     expect(buildFeatureSkill).toContain("Close the `verifier` agent");
@@ -255,6 +273,7 @@ describe("workflow file generation", () => {
     expect(buildFeatureMetadata).toContain("agent named executor immediately");
     expect(buildFeatureMetadata).toContain("close executor after integrating");
     expect(buildFeatureMetadata).toContain("agent named tester");
+    expect(buildFeatureMetadata).toContain("required automated tests by change type");
     expect(buildFeatureMetadata).toContain("repo-local quality skills");
     expect(externalSkillFile).toContain("name: next-best-practices");
     expect(externalSkillReference).toContain("## Project Structure");
@@ -677,6 +696,8 @@ describe("workflow file generation", () => {
     expect(planFeatureSkill).toContain("This repository uses the single-agent workflow mode.");
     expect(planFeatureSkill).not.toContain("This skill requires Codex multi-agent.");
     expect(buildFeatureSkill).toContain("Implement the approved plan directly in the current session.");
+    expect(buildFeatureSkill).toContain(".agents/skills/repo-test-policy");
+    expect(buildFeatureSkill).toContain("required automated coverage by change type");
     expect(buildFeatureSkill).not.toContain("Spawn the agent named `executor`");
     expect(verifyFeatureSkill).toContain("Run the repository verification workflow in the current session.");
     expect(reviewFeatureSkill).toContain("Perform the final review in the current session.");

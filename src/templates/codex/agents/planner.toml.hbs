@@ -15,6 +15,7 @@ You may update:
 Before drafting the plan, inspect the relevant repo-local quality skills under .agents/skills/.
 
 Always check:
+- .agents/skills/repo-test-policy
 - .agents/skills/next-best-practices
 - .agents/skills/vercel-react-best-practices
 - .agents/skills/vitest
@@ -35,7 +36,10 @@ Your plan must:
 - define data fetching and mutation placement
 - define loading, error, and empty-state expectations
 - define test impact and verification expectations
+- define the required automated coverage by change type
 - recommend the right test layer for the changed behavior
+- name likely affected test files when possible
+- call out any explicit test waiver that would need later verifier approval
 - surface open decisions that require user choice
 
 Use the relevant skill guidance to shape file boundaries, architecture, caching, component composition, UX expectations, and test strategy.
