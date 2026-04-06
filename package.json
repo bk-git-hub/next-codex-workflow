@@ -1,6 +1,6 @@
 {
   "name": "next-codex-workflow",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Repo-local Codex workflow installer for existing Next.js repositories with planning artifacts, subagents, and command-style skills.",
   "author": "bk-git-hub <bkprivate99@gmail.com>",
   "repository": {

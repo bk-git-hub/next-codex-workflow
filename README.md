@@ -9,6 +9,22 @@ New here: start with `USER_JOURNEY.md` for the end-to-end flow.
 `v0.1` is implemented from
 `nextjs-codex-workflow-kit-implementation-spec-v0.1.md`.
 
+## Version Updates
+
+- `0.1.0`
+  Initial repo-local Codex workflow installer for existing Next.js repositories.
+- `0.1.1`
+  Stabilized the generated multi-agent workflow, bundled execution/testing
+  quality skills, and hardened the verification/update path.
+- `0.1.2`
+  Added the `explorer` planning step, `single-agent` vs `multi-agent` workflow
+  selection, the interactive installer, optional stage-prefixed auto-commit
+  behavior, explicit subagent cleanup instructions, and stricter automated test
+  policy generation.
+- `0.1.3` (in preparation)
+  Preparing the next release line in README first so release-facing changes are
+  tracked in one place before the package version is bumped and published.
+
 ## What It Does
 
 `next-codex-workflow` prepares an existing Next.js repository so Codex can use
