@@ -18,6 +18,14 @@ export default defineConfig({
   ],
   test: {
     environment: "node",
-    testTimeout: 10000
+    testTimeout: 10000,
+    include: ["tests/**/*.test.ts"],
+    exclude: [
+      "tmp/**",
+      "local-docs/**",
+      "dist/**",
+      "coverage/**",
+      "**/node_modules/**"
+    ]
   }
 });
