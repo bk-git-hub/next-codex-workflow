@@ -6,8 +6,15 @@ New here: start with `USER_JOURNEY.md` for the end-to-end flow.
 
 ## Status
 
-`v0.1` is implemented from
-`nextjs-codex-workflow-kit-implementation-spec-v0.1.md`.
+This project is no longer actively maintained.
+
+It was created to compensate for limitations in repository context,
+workflow continuity, and verification in earlier coding agents.
+As native agent capabilities and context handling improved, the fixed
+workflow's maintenance cost became greater than its additional value.
+
+The repository remains available as an experiment in repo-local agent
+workflow design.
 
 ## Version Updates
 
